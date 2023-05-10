@@ -1,0 +1,1704 @@
+---
+title: "Evidencia Individual 2"
+author: "Alhelí Acosta- A01382195"
+date: "12/2/2021"
+output: 
+  html_document:
+    theme: spacelab
+    code_folding: show
+    toc: true
+    number_sections: TRUE
+    toc_depth: 2
+    toc_float: 
+      smooth_scroll: FALSE
+      collapsed: FALSE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+<style>
+  #TOC{
+  color: #000000;
+  font-family: Arial;
+  font-size: 12px
+border-color: #000000;}
+
+body{
+  color: #000000;
+  font-family: Arial;
+  background-color: #f7f7f7;
+  }
+pre{
+  color: #000000;
+  }
+</style>
+
+```{r include=FALSE}
+library(recommenderlab)
+library(ggplot2)
+library(dplyr)
+```
+
+# SP1: Sistema de recomendación de chistes
+
+## Introducción:
+
+En esta situación problema lo que se busca es pode hacer un sistema de recomendación de chistes para el usuario actual y los nuevos usuarios, estos chistes cuentan con una métrica de evaluación del **-10** siendo lo menos gracioso al **10** siendo este valor el más gracioso.
+Dentro de la situación problema se enocntrarán tres modelos de recomendación y serán evaluados para poder elegir el modelo más adecuado, dentro del sistema igualmente se encontrará dos parámetros específicos que son  el mínimo número de ratings dado por el usuario y la calificación que se considere como la "mínima buena calificación".
+
+## Desarrollo
+
+### Preguntas exploratorias
+
+ Responder las preguntas anteriores con sustento en fuentes secundarias confiables: 
+ 
+1.  **¿Qué tipo de herramientas analíticas se requieren para diseñar un sistema que haga recomendaciones a sus usuarios de manera similar a Netflix y Amazon?**  
+Netflix y Amazon son empresas que se han caracterizado por brindarle recomendaciones “casi exactas”dependiendo las necesidades del usuario. Sin embargo , la clave de estas recomendaciones está basada en algoritmos en conjunto que crean dichos sistemas de recomendaciones.   
+
+Un ejemplo también es el sistema de recomendación de Youtube este ha sido muy importante durante los últimos años ya que es la fuente número uno de vistas, que recomienda videos personalizados a los usuarios en base a su nivel de actividad, igualmente existe una fuerte correlación entre el recuento de visualizaciones promedio de los videos que ve el usuario y lo toma como referencia, la tasa de clics es algo que se toma en cuenta para este sistema. Finalmente el sistema también se relaciona con la diversidad. (Zhou,R., Khemarat,S., Gao.L, 2010)
+Estas empresas toman datos implícitos (de comportamiento) y explícitos como de cada uno de los usuarios para poder formar dichos modelos de recomendaciones, utilizando métodos como filtros colaborativos, singular value decomposition etc. En donde a través del machine learning se crean algoritmos para subdividir los usuarios en grupos pequeños que comporten mismas características y poder realizar las recomendaciones.   
+   
+Es por ello que para poder diseñar los sistemas de recomendaciones se necesita el acceso a los datos de los usuarios (sea cual sea el tipo de datos), para proceder a analizarlos y crear las subdivisiones basadas en las similitudes (depende del método que se utilice, item based o user based).(Urgellés-Molina, A., & Medina-Laverón, M., 2018)
+   
+Es así como existen diversos softwares y plataformas que permiten crear y desarrollar sistemas de recomendaciones, de entre los cuales destacan:   
+
+-       R studio   
+
+-       Azure Personalizer   
+
+-       Adobe Sensei   
+
+-       Recombee   
+   
+**2. ¿Qué tipo de datos son necesarios para que este tipo de herramientas analíticas puedan ser aplicadas?**
+
+Para que este tipo de herramientas puedan ser aplicadas es necesario contar con datos del comportamiento de los usuarios para lograr encontrar subdivisiones tomando en cuenta sus similitudes. Para esto se necesitan tanto datos implícitos como explícitos.
+
+Los datos usados en los sistemas de recomendación se dividen en dos. El primero son los datos explícitos donde se usa la retroalimentación del usuario hacia un item. Este tipo de datos es cuantificable. El otro tipo de datos es el implícito, donde se toman en cuenta otras medidas como sus vistas, clicks, likes, etc., del usuario.
+
+Los datos usados por lo general se dividen en los datos históricos del usuario (clicks, búsquedas, vistas a items, etc.), detalles del item (título, categoría, precio, etc.), e información del contexo (aparato electrónico, ubicación).
+
+Por ejemplo, en el content based filtering se hace uso de un vector del usuario, para el cual se necesitan datos de sus intereses, edad, género, historia, etc. El otro vector es el del producto o item, donde se usan datos de la similitud entre los distintos items.
+
+**3. ¿Qué tipo de plataformas tecnológicas o software computacional requiere una empresa que quiera desarrollar su propio sistema de recomendación?**
+
+Los sistemas de recomendación conllevan varios procesos y por ende tener la accesibilidad de plataformas tecnológicas y software computacional es esencial para que se pueda tener un buen funcionamiento y buenos resultados. Para empezar se tiene que analizar el procseo que conlleva un sistema de recomendaciones, y los puntos más importantes a considerar son: el almacenamiento, el procesamiento y la presentación de resultados. Para el almacenamiento, en caso de no poder implementar una solución de almacenamiento en la nube (warehousing), se tendrá que buscar al mejor proveedor de este servicio, debe de tener escalabilidad, acceso fácil y rápido, frecuencia de registro inmediata o diaria y se debe de poder acoplar (manipular) para las necesidades de la compañía, un servicio muy bueno para esto podría ser SQL y sus servidores, o AWS. Después para el procesamiento se tiene que contratar o desarrollar el sistema de recomendación y se tiene que definir si va a ser basado en los productos o en los usuarios, o ambos (pero conlleva más trabajo), para este paso se pueden contratar los servicios de Azure Machine Learning para poder implementar alguna base ya hecha y manipularla a las necesidades de la empresa. Por último la presentación de resultados, claramente este es el paso más importante, ya que es el que va a hacer que los clientes obtengan lo que están buscando de manera más rápida y eficaz, y para este proceso simplemente se utiliza el programa o espacio en donde ya se encuentre la plataforma de la compañía (por ejemplo Netflix, su página inicial) y ahí se implementan las recomendaciones que se hayan conseguido en el proceso o inclusive se puede implementar la fase del procesamiento con la de presentación de resultados para que se haga de manera automática y se pueda hacer de manera inmediata o diaria de preferencia, un sistema que se puede integrar con todo esto es con un todo el ambiente de Azure o inclusive ver planes con Oracle, pero todo dependerá de como la empresa en cuestión decida hacer su sistema de recomendación y todo lo que conlleva, también algo que puede ser de mucha utilidad es hacer este proceso con el apoyo de una consultora que sepa de este proceso.
+   (Albán, G. P. G., Albán, C. G., & Valverde, I.,2018)
+
+**4. ¿A qué empresas pueden beneficiar estas herramientas analíticas?**
+
+Los sistemas de reocmendaciones están destinadas a ayudar a los usuarios a reducir sobrecarga de información y agilizar la toma de deciiones en cuanto al consumo, esto beneficia mucho a las empresas dentro del comercio electrónico ya que incorporan un valor extra a sus clientes (Urguellés-Molina & Medina-Laverón, 2018).   
+Los sistemas de recomendación permite recomendar a los usuarios ítems que no han sido vistos por el usuario activo pero que han resultado bien valorados por usuarios similares, con el fin de promover un mayor consumo de los usuarios. Esto se puede aplicar para todas aquellas empresas dentro de las plataformas tecnológicas como la venta de artículos, consumo de contenido audiovisual, redes sociales, búsqueda de información en plataformas tecnológicas (Guevara, Guevara & Valverde, 2017).   
+Principalmente es utilizado por empresas que cuentan con un gran volúmen de información, una cartera de clientes y un catálogo de productos extensos, si no se cuentan con alguno de esto, los sistemas de recomendación pueden no ser de mucha utilizad (Guevara, Guevara & Valverde, 2017).   
+
+Estas herramientas pueden ser beneficiadas por todo tipo de empresas, desde utilizarlas para mejoras de procesos, sistemas de apoyo para el proceso de la toma de decisiones, herramientas de comunicación y dispositivo para dar sentido. (Mantymaki, M., Hyrynsalmi, S. y Koskenvoima, A.,2020)
+
+**5. Específicamente, en el área de Mercadotecnia, ¿qué tipo de proyectos pueden llevarse a cabo con estas herramientas analíticas? (aplicaciones de negocio)**
+
+La expansión tecnológica trae muchas oportunidades para diferentes áreas laborales, un ejemplo es marketing y las nuevas aplicaciones y enfoques que le pueden dar con sus datos. Un ejemplo es el aprendizaje ML, aprendizaje automático, que ayuda a predecir y tomar decisiones a través de diferentes aplicaciones como redes neuronales, aprendizaje de profunidad, Inteligencia Artificial a través de chat bots, modelos de IA para predecir, míneria de textos por ejemplo en los hashtags (Miklosik, A., Kuchta, M, Evans, M., Sak,S., 2019) y 
+ños sistemas de recomendación son herramientas que con más frecuencia estan siendo utilizadas por empresas, debido a sus diferetes beneficios como lo es  mejorar las decisiones e influir en las opiniones de los usuarios.(Monslave, 2010)
+Algunas de las aplicaciones de negocio que tiene esta herramienta de analítica es:
+
+- Incrementar el número de ventas, al encontrar productos en los cuales podrían estar interesados.
+- Retención de clientes, ya que a través de la personalización se genera una experiencia de compra más positiva.
+- Encontrar nuevos segmentos de mercado, en las redes sociales al sugerir al usuario páginas en las cual poddrían estar interesados ayudan a conectar negocios con grupos objetivos
+
+### Desarrollo del reporte
+
+**Base de datos:**
+
+```{r include=FALSE}
+data(Jester5k)
+class(Jester5k)
+dim(Jester5k@data)
+```
+
+```{r include=FALSE}
+Jokes <- as.data.frame(JesterJokes)
+```
+
+```{r}
+## number of ratings 
+nratings(Jester5k) 
+
+## number of ratings per user 
+summary(rowCounts(Jester5k)) 
+
+## rating distribution 
+hist(getRatings(Jester5k), main="Distribution of ratings") 
+
+## 'best' joke with highest average rating 
+best <-which.max(colMeans(Jester5k)) 
+cat(JesterJokes[best])
+```
+Ejemplo de Chiste:
+
+```{r}
+dataraw<-as.matrix(Jester5k@data)
+```
+   
+#### Breve análisis exploratorio de los datos y limpieza   
+Como podemos observar a continuación no tenemos ningun valor faltante en la base de datos de las calificaciones a los chistes   
+```{r}
+colSums(is.na(dataraw))
+```
+   
+También podemos observar como la base de datos de los chistes no tiene ningún valor faltante.   
+```{r}
+colSums(is.na(Jokes))
+```
+   
+#### Promedio de calificaciones de los chistes 
+
+A continuación se muestra la distribución de los promedios de calificaciones de los chistes:   
+```{r fig-hist1, fig.cap="Promedio de calificación chistes",warning=FALSE, message=FALSE}
+colMeans(Jester5k) %>% 
+  tibble::enframe(name = "joke", 
+                  value = "joke_rating") %>% 
+  ggplot(aes(joke_rating)) +
+  geom_histogram(color = "black", fill="pink3") +
+  theme_minimal()
+
+```
+
+
+##### Total de calificaciones otorgadas por los usuarios   
+A continuación se muestra la distribución del total de calificaciones otorgadas, podemos ver como muchos de los usuarios sí otorgaron calificaciones a una gran cantidad de chistes   
+```{r fig-hist2, fig.cap="User Rating Count", warning=FALSE, message=FALSE}
+
+rowCounts(Jester5k) %>% 
+    tibble::enframe(name = "user", 
+                  value = "rating_count") %>% 
+  ggplot(aes(rating_count)) +
+  geom_histogram(color = "black", fill="lightblue") +
+  theme_minimal()
+```
+   
+Para el análisis se van a eliminar aquellos chistes con menos de 50 calificaciones se eliminará así como los usuarios con menos de 36 chistes calificados.   
+```{r}
+joke_small <- Jester5k[rowCounts(Jester5k) >= 36,
+                     colCounts(Jester5k) >= 50]
+joke_small
+```
+
+#### Explica y justifica los paramétros de tu sistema de recomendación
+
+Ennuestro sistema de recomendación usaremos 2 parámetros en específico: el mínimo número de ratings dado por el usuario y la calificación que se considere como la "mínima buena calificación". En el caso del primer parámetro se decidió que fuera de mínimo 36 calificaciones por usuario. Esto es debido a que fue la cantidad mínima por usuario y a que consideramos que es una cifra suficientemente grande para identificar los gustos de los usuarios en cuanto a chistes para poder recomendarles uno adecuado a lo que les gusta. En cuanto al segundo parámetro, se eligió que a partir de un 5 de calificación se considerará como un buen rating. Esto fue tomando en cuenta la escala de ratings, la cual va de -10 a 10. Consideramos que una calificación en el rango de -10 a -1 sería un rating negativo, uno de 0 a 4 uno neutral y uno de 5 a 10 uno positivo.
+
+#### Prueba al menos 3 diferentes métodos de recomendación
+
+1. Constuyendo el sistema de recomendación
+
+- **Given**: 36   
+El número para el parámetro es de 36 ya que es una cantidad adecuada ya que fue la cantidad mínima por usuario y con esto contamos con gran variedad para poder encontrar que chistes son del agrado del usuario, si redujeramos el número podría ser más díficil identridiar estos gustos al igual que si el número fuera mayor por que se podrían repetir muchos patrones de los usuarios.
+
+- **goodRating** = arriba de 5 de calificación
+
+Como mencionabas,la referencia será 5, ya que es considerada dentro del rango de good rating, en caso de que el valor fuera menor a 5 el modelo podría empeorar, ya que podría mostrar muchos chistes que sean considerados poco graciosos por el usuario.
+
+```{r}
+set.seed(12345)
+eval_jokes <- evaluationScheme(data = joke_small, 
+                      method = "cross-validation", 
+                      k = 10,
+                      given = 36, 
+                      goodRating = 5)
+eval_jokes
+```
+   
+Se crean bases de datos de entrenamiento, conocidos y desconocidos:   
+```{r}
+train_jokes <- getData(eval_jokes, "train")
+known_jokes <- getData(eval_jokes, "known")
+unknown_jokes <- getData(eval_jokes, "unknown")
+```
+
+#### Evaluando el desempeño de los modelos de recomendación   
+Se utilizarán los modelos de **IBCF**, **POPULAR** y **SVD**.   
+
+1. IBCF   
+```{r}
+ibcf <- 
+  train_jokes %>%
+  Recommender(method = "IBCF") 
+
+ibcf_eval <- ibcf %>% 
+  predict(known_jokes, type = "ratings") %>% 
+  calcPredictionAccuracy(unknown_jokes)
+```
+
+Podemos ver como el valor del RMSE de este modelo es de **4.951637**   
+```{r}
+print(ibcf_eval)
+```
+
+2. Popular   
+Podemos ver como el valor del RMSE de este modelo es de **4.468743** 
+```{r}
+pop <- 
+  train_jokes %>%
+  Recommender(method = "POPULAR")
+
+pop_eval <- pop %>% 
+  predict(known_jokes, type = "ratings") %>% 
+  calcPredictionAccuracy(unknown_jokes)
+```
+   
+ 
+```{r}
+print(pop_eval)
+```
+   
+4. SVD   
+```{r}
+svd <- 
+  train_jokes %>%
+  Recommender(method = "SVD")
+
+svd_eval <- svd %>% 
+  predict(known_jokes, type = "ratings") %>% 
+  calcPredictionAccuracy(unknown_jokes)
+```
+
+Podemos ver como el valor del RMSE de este modelo es de **4.438530**  
+```{r}
+print(svd_eval)
+```
+   
+#### ¿Cuál método fue el mejor? ¿por qué?
+
+En esta parte para saber cual fue el mejor método, haremos una gráfica que contenga todo los RMSE de los sitemas de recomendaciones hechos.
+ Lo que **concluimos** que de los tres métodos "SVD" es el mejor ya que tiene el menor RMSE (Distancia media cuacrática mínima), quiere decir que con este método descomponera la matriz principal de chistes en diferentes matrices que contienen propiedades útiles e interesantes de la matriz principal.
+
+```{r}
+rbind(ibcf_eval, pop_eval, svd_eval) %>% 
+  as.data.frame() %>% 
+  tibble::rownames_to_column(var = "method") %>% 
+  ggplot(aes(x = method , y = RMSE)) + geom_col(fill=NA, colour = "#066689") + theme_light() 
+```
+
+
+
+
+#### Empleando tu modelo de recomendación final, realiza recomendaciones de chistes a los primeros 10 usuarios 
+
+Para este paso haremos una recomendación de 5 chistes para 10 usuarios:
+```{r}
+Recomendación <- svd %>% 
+  predict(known_jokes, n = 5)
+```
+
+```{r}
+as(Recomendación, "list") %>%
+  head(10)
+```
+
+Como podemos observar, las recomendaciones que se hicieron para cada usuario son relativamente diferentes, sin emabrgo, hay algunas instancias en las que se repite el chiste, por ejemplo el 
+ **j50 (4)**
+```{r}
+Jokes[50,1]
+```
+
+**j53 (4)**
+```{r}
+Jokes[53,1]
+```
+
+**y j32**
+```{r}
+Jokes[32,1]
+```
+
+, con estos resultados podemos observar que el sistema de recomendaciones es funcional y utiliza las características importantes como el rating, etc. para poder desplegar las mejores recomendaciones para los usuarios de la plataforma. 
+
+## Conclusiones
+
+ Con la creación de los modelos y la evaluación de estos para saber cual era más adecuado con nuestros parámetros, pudimos ver los elementos fundamentales para poder hacer un sistema de recomendación como lo son los criterios o parámetros relevantes, que en este caso contamos con dos.
+ Igualmente con nuestras conclusiones y las recomendaciones que pudimos hacer al final de la situación problema se reconoce la importancia que tienen este tipo de sistemas en las empresas, como lo es poder predecir lo que sería relevante para nuestro usuario con diferentes fines como generar interés, lograr que consuma más o en este caso encontrar chistes que fueran graciosos para el usuario. Para esto podriamos decir que seguimos algunos pasos implícitos para llegar a las recomendaciones, como:
+ 
+ 1. Evaluar las necesidades del usuario/proyecto
+ 2. Estudiar los datos y al usuario
+ 3. Encontrar criterios relevantes
+
+
+# Sp2: Modelos de clasificación y regresión para marcas premium de tequila
+
+## Introducción
+
+La industria tequilera se ha vuelto una de las más predominantes dentro del mercado mexicano, es por eso que dentro de esta situación problema se estara haciendo un análisis a través de redes neuronales que permiten extraer información útily poder hacer inferencias a partir de los datos, igualmente se estará trabajando con Modelos de árbol de decisión, que tienen una función muy similar a las redes neuronales que divide los predictores agrupando por observaciones simialres, todo esto de las tres marcas de tequila con mejor posicionamiento del mercado mexicano (Maestro Tequilero, Don Julio reposado y Herradura reposado), con el fin de conocer el proceso de elección de un cliente en cuanto a estas tres marcas y los factores relevantes de decisión  e igualmente poder observar la lealtad que tienen los clientes con las respectivas marcas.
+
+## Desarrollo
+
+### Investigación en fuentes secundarias   
+
+**Preguntas exploratorias: **  
+
+Se dice que la marca con el mejor posicionamiento es aquella que cumple mejor los atributos más relevantes de elección de compra. Con base en los datos del estudio:   
+   
+**1. ¿Cuál dirías que son los atributos más importantes de un tequila?**   
+De acuerdo a la información proporcionada y la información recopilada a través del estudio cualitativo de encuestas a personas de entre 18 a 30 años de edad , quienes suelen consumir tequila de manera frecuente, se reveló que los atributos más importantes de un tequila son su sabor, recomendación, marca y precio. Sin embargo, también existen otros factores secundarios que pueden afectar el proceso de compra de un tequila en donde destaca el empaque, el tiempo de la marca en la industria y las campañas publicitarias que estos utilizan.   
+
+**2. ¿Cuál es la marca que cumple mejor con cada uno de los atributos relevantes de elección de compra?**   
+Los atributos relevantes para la elección de compra son:   
+
+- Que el sabor sea agradable   
+
+- Que el olor sea agradable   
+
+- Que la textura sea adecuada   
+
+- Que el grado de alcohol sea adecuado   
+
+- Que el empaque sea llamativo   
+
+- Que el tamaño del envase sea adecuado   
+
+- Que el producto pueda ser usado en coctelería   
+
+De acuerdo con el mapa de posicionamiento que viene dentro de la información podemos observar que de las tres marcas Don julio es la que cuenta con mejor posicionamiento en base a diferentes factores claves de éxito.   
+   
+**3. Con base en el desempeño de los atributos ¿Cuál es el posicionamiento de cada una de las marcas?**   
+Después de promediar los resultados de los atributos en el apartado de variables, se llegó a la conclusión de que las 3 marcas tuvieron los mismos resultados en todas las preguntas de manera promediada. Para las primeras 6 preguntas, las 3 marcas obtuvieron un resultado promediado de 6/7, y para la séptima pregunta obtuvieron un resultado promediado de 5/7, los resultados fueron interesantes, y en base a estos resultados de las preguntas de desempeño no podemos decir que marca obtuvo el primer lugar y cuál el tercer lugar. Sin embargo, se pueden hacer otro tipo de análisis para observar el comportamiento de estas variables, pero si solo hacemos este proceso de manera exploratoria, estos serían los resultados   
+   
+###  Investigación fuentes secundarias:
+
+**1. ¿Qué son los Tree-Based models? Principales características y usos.**   
+
+Este tipo de modelos utilizan un árbol de decisiones para representar cómo se pueden usar diferentes variables de entrada para poder predecir un valor objetivo (Enterprise AI, s.f.).   _Características:_   
+
+- La generación de un árbol de decisiones da como resultado que las variables con mayor influencia en la predicción estén en la parte superior de la jerarquía del árbol, mientras que las más irrelevantes se eliminan de la jerarquía (Enterprise AI, s.f.)   
+
+- Son fáciles de entender e interpretar, los resultados se pueden explicar fácilmente (Enterprise AI, s.f.)   
+
+- Funcionan bien incluso con grandes conjuntos de datos (Enterprise AI, s.f.)   
+
+- Requieren menos preparación de datos que otras técnicas (Enterprise AI, s.f.)   
+
+- No necesita escalado de funciones, como estandarización o normalización en el preprocesamiento (Rendyk, 2021).   
+
+_Usos:_   
+
+- Se utilizan para problemas de clasificación y regresión (Enterprise AI, s.f.)   
+
+- Se utilizan para predecir conjuntos de datos tabulares y espaciales (Enterprise AI, s.f.)   
+
+- Se usan en cualquier tipo de datos, numéricos o categóricos (Patel, 2018)   
+
+**2. Explica cómo funciona el algoritmo de los Tree-Based Models.**   
+Las variables de entrada se segmentan repetidamente en subconjuntos para construir el árbol de decisión, y cada rama se prueba para poder determinar la precisión de la predicción, evaluando su eficiencia y eficacia. Una vez realizado el algoritmo, el modelo comienza desde el nodo superior que se divide en 2 ramas en cada nivel de profundidad. En cada uno de estos niveles existen condiciones que cuestionan los valores de las características, donde a través de una respuesta binaria decide a qué rama se debe seguir. Este proceso continúa hasta llegar a las ramas finales (llamadas hojas) donde podemos obtener la predicción de esa hoja final  (Rendyk, 2021).   
+
+**3. ¿Qué son las Redes Neuronales? Principales característicos y usos.**   
+Las redes neuronales son modelos simples del funcionamiento del sistema nervioso , en donde las unidades básicas son las neuronas que pueden ser organizadas en capas (IBM, 2021)   
+   
+Existen 4 características principales de las redes neuronales: su topología, mecanismo de aprendizaje, el tipo de asociación entre la información de entrada y salida y la forma de representación de estas informaciones.   
+   
+Algunos usos de las redes neuronales han ido incrementando cuando se crean más sistemas avanzados, algunas están relacionadas directamente con el Machine Learning:   
+
+- Predicción en ventas   
+
+- Reconocimiento de tendencias   
+
+- En las energías renovables   
+
+- Automóviles autónomos   
+
+- Procesamiento de datos y modelización   
+   
+**4. Explica cómo funciona el algoritmo de las Redes Neuronales.**   
+El algoritmo de las redes neuronales tiene como función entender los datos del mundo real como por ejemplo imágenes, voz, texto, etc; los algoritmos funcionan con base al tipo de aprendizaje , que se podría dividir en tres categorías el aprendizaje supervisado que ayuda a valorar correctamente los datos, después tenemos la segunda clasificación no supervisado y en este caso el algoritmo ayuda a encontrar variantes de patrones y correlaciones, por último tenemos el aprendizaje reforzado que es básicamente evaluar como prueba y error.   
+   
+**5. Da al menos 1 ejemplo en donde sería más apropiado emplear Tree-based models y 1 ejemplo donde sería más apropiado emplear Redes Neuronales.**    
+Aunque los modelos tree-based y las redes neuronales pueden usarse para situaciones similares, cada uno cuenta con distintas ventajas y desventajas que los ahcen más apropiados para ciertos casos. En el caso de los tree-based models podemos observar que parte de sus ventajas incluyen que son más fáciles de interpretar, pueden modelar datos no lineales, pueden usarse para clasificación y regresión. En cuanto a sus desventajas sabemos que árboles grandes son difíciles de interpretar, que tienen varianza alta, que pueden tener overfit fácilmente y que su presición puede ser menor a la de otros modelos. En cuanto a las redes neuronales, sus ventajas incluyen que pueden inferir significado y detectar patrones en sets de datos complejos, sin embargo, son por lo general muy difíciles de interpretar.   
+   
+Debido a esto, una red neuronal es muy útil en situaciones donde otros modelos tendrían complicaciones de encontrar significado debido al nivel de complejidad de los datos. Es por esto que se utilizan en situaciones como el reconocimiento de imágenes y patrones (ejemplo: reconocimiento de personas en fotos). Un árbol de decisiones sería muy útil en situaciones donde se busca predecir el comportamiento de una persona, como qué tan probable es un cliente en comprar un producto.   
+
+### Preguntas centrales   
+
+```{r include=FALSE}
+library(readxl)
+library("rpart") #For the tree models
+library("rpart.plot") #For the plots
+library("caret") #For the evaluation matrix
+library("Metrics") #for the Classification and regression error
+library(factoextra)
+library("dplyr")
+library(funModeling)  
+library(pROC)
+library(caTools)
+library(caret)
+library(neuralnet)  
+```
+
+#### Modelos de Clasificación
+
+##### Árbol de decisión
+
+```{r}
+setwd("/Users/gustavoacosta/Desktop/5 semestre/míneria_de_datos")
+tequila <- read_excel("tequila.xlsx")
+tequila <-tequila[,c(-1,-2,-3,-4)]
+```
+Aqui observamos un algunas estadísticas descriptivas de las variables númericas de nuestra base de datos:
+
+```{r}
+summary(tequila)
+```
+
+**Model Structure**
+
+Se realizara un arbol de decision utilizando la variable "Don_julio" como variable independiene para poder analizar el comportamiento de los usuarios de acuerdo a las diferentes clasificacion de marcas de tequila que se tuvieron en las encuestas.  
+```{r}
+tequila_model <- rpart(Don_Julio ~ ., data = tequila, method = "class")
+tequila_model$variable.importance
+```
+
+Analizando los resultados, se puede observar que las variables independientes que incluye el modelo como relevantes son las siguientes:   
+
+
+- VP4: Si el usuario pagaria mas dinero por esta marca que por otras   
+
+- DP4: El grado de alcohol del tequila era adecuado
+
+- VP1: Los precios de esta marca son justos
+
+- DP3: La textura del tequila era adecuada
+
+- VP8: Por su precio, esta marca conviene
+
+- L13: Prefiero a esta marca que a las demás
+
+- VP2: Si la marca le ofrece mucho mas por lo que paga.   
+
+Cabe recalcar que las respuestas estan en una escala del 1 al 7, siendo 1 desacuerdo y 7 de acuerdo.
+Las que menos tienen a **importancia**
+   
+Ahora, se realizará el gráfico del modelo anterior realizado:   
+```{r}
+rpart.plot(x = tequila_model, yesno = 2, type = 0, extra = 0)
+```
+
+Dentro de esta imagen árbol de decisión podemos ver las bifurcaciones y en total son 15 ramas del modelo, entre más ramas tenga quiere decir que existe más complicidad al momento de tomar una decisión. Podemos ver que el nodo superior es **TDR** donde se muestra *las últimas 3 ocasiones que han tomado tequila* en donde las opciones pueden ser sí o no si el valor es mayor a 3.
+
+```{r include=FALSE}
+rpart.predict(tequila_model, newdata=tequila, rules = TRUE)
+```
+
+Para iniciar a construir el modelo de arbol optimo, se deben de dividir las observaciones de la base de datos en observaciones de entrenaimiento y de prueba.   
+```{r}
+
+#Train/Test split
+
+# Total number of rows in the credit data frame
+n <- nrow(tequila)
+
+# Number of rows for the training set (80% of the dataset)
+n_train <- round(0.8 * n) 
+
+# Create a vector of indices which is an 80% random sample
+set.seed(123)
+train_indices <- sample(1:n, n_train)
+
+# Subset the credit data frame to training indices only
+tequila_train <- tequila[train_indices, ]  
+  
+# Exclude the training indices to create the test set
+tequila_test <- tequila[-train_indices, ]  
+```
+
+Ahora se realizara el entrenamiento del modelo para poder evaluar y predecir el comportamiento de consumo de los encuestados en cuanto a las marcas de Tequila/   
+```{r}
+# Train the model (to predict 'DON_Julio')
+tequila_model <- rpart(formula = Don_Julio~ . , data = tequila_train, method = "class")
+
+# Look at the model output                      
+print(tequila_model)
+```
+Las variables con mayor significancia son:
+
+- COM4
+- VP4
+- DP3
+- L2
+- VP1
+- ST6
+
+
+```{r}
+tequila_model$variable.importance
+```
+
+Aquí tenemos otro modelo de árbol de decisión que tiene un total de 7 ramificaciones, quiere decir que tiene un menor número de ramificaciones en comparación al modelo anterior, lo que podría hacer una toma más fácil de decisión. Y el nodo superior de este modelo es la variable ST6 que quiere decir "Esta marca cumple con lo que esperaba recibir de ella", en donde la bifurcación empieza si el valor en mayor o igual a 6.
+
+
+
+```{r}
+rpart.plot(x = tequila_model, yesno = 2, type = 2, extra = 0)
+```
+
+**Evaluar el Modelo**
+
+```{r}
+# Generate predicted classes using the model object
+class_prediction <- predict(object = tequila_model, newdata = tequila_test, type = "class")     
+
+#type = prob will return probabilities instead of classes
+                            
+# Calculate the confusion matrix for the test set
+confusionMatrix(data = class_prediction, reference = as.factor(tequila_test$Don_Julio))
+```
+Se puede observar a traves de estas diferentes metricas que el modelo creado es un buen modelo para predecir las marcas de tequila que los usuarios prefieren tomando en cuenta las demas variables (preguntas) de la encuesta realizada. Se puede observar esto debido a que el accuracy del modelo es de alrededor de 56%, ademas de tener un valor de Kappa de 0.038.
+   
+```{r}
+# Train a gini-based model
+tequila_model1 <- rpart(formula = Don_Julio ~ ., 
+                       data = tequila_train, 
+                       method = "class",
+                       parms = list(split = "gini"))
+
+# Train an information-based model
+tequila_model2 <- rpart(formula = Don_Julio ~ ., 
+                       data = tequila_train, 
+                       method = "class",
+                       parms = list(split = "information"))
+
+# Generate predictions on the test set using the gini model
+pred1 <- predict(object = tequila_model1,
+                 newdata = tequila_test,
+                 type = "class")    
+
+# Generate predictions on the test set using the information model
+pred2 <- predict(object = tequila_model2, 
+                 newdata = tequila_test,
+                 type = "class")
+```
+
+#### Compare classification error
+
+```{r}
+ce(actual = tequila_test$Don_Julio, 
+     predicted = pred1)
+ce(actual = tequila_test$Don_Julio, 
+     predicted = pred2)
+```
+
+#### Matriz de Confusión
+```{r}
+confusionMatrix(data = pred1, reference = as.factor(tequila_test$Don_Julio))
+```
+
+
+```{r}
+confusionMatrix(data = pred2, reference = as.factor(tequila_test$Don_Julio))
+
+```
+
+### Hiperparámetros para el mejor modelo de clasificación
+Dentro de esta parte estaremos aplicando hiperparámetros para mejorar nuestro mejor modelo de clasificación.
+Lo primero que observamos es un gráfico de parámetro de complejidad
+Tiene 7 nodos terminales, vemos rendimientos decrecientes a medida de que el árbol crece más profundo.
+```{r}
+# Plot the "CP Table"
+plotcp(tequila_model)
+```
+
+
+```{r}
+# Print the "CP Table"
+print(tequila_model$cptable)
+```
+
+
+```{r}
+# Retrieve optimal cp value based on cross-validated error
+opt_index <- which.min(tequila_model2$cptable[, "xerror"])
+cp_opt <- tequila_model$cptable[opt_index, "CP"]
+# Prune the model (to optimized cp value)
+tequila_model_opt <- prune(tree = tequila_model, 
+                         cp = cp_opt)
+
+tequila_model_opt$variable.importance
+```
+
+Ahora tenemos un árbol de decisión con 5 ramas que tendra un mejor número de error con los hiperparámetros ya establecidos, el nodo principal sigue siendo la variable 12.
+```{r}
+# Plot the optimized model
+rpart.plot(x = tequila_model_opt, yesno = 2, type = 0, extra = 0)
+```
+
+```{r}
+# Generate predictions on a test set
+
+class_prediction <- predict(object = tequila_model_opt, newdata = tequila_test, type = "class")     
+
+# Calculate the confusion matrix for the test set
+
+confusionMatrix(data = class_prediction, reference = as.factor(tequila_test$Don_Julio))
+```
+
+
+Ahora podemos observar que nuestras métricas con los hiperparámentros muestra diferentes resultados, como por ejemplo precisión de 65%, un Kappa de.0789, sensibilidad de 14.29% y especifidad de 92.31%.
+
+Con los hiperparámetros podemos observar que nuestras métricas mejoraron para el modelo un ejemplo es la prescisión, haciendo que sea un mejor modelo.
+
+
+##### Red Neuronal: Modelo de Clasificación
+
+Primero vamos a empezar cargando la base de datos para visualizarlos y poder hacer de manera correcta los análisis de la actividad.   
+```{r}
+library(readxl)
+setwd("/Users/gustavoacosta/Desktop/5 semestre/míneria_de_datos")
+tequila_red <- read_excel("tequila_2.xlsx")
+tequila_red <- tequila_red[c(-1, -4, -44)]
+```
+Las dos columnas que no iban a funcionar han sido removidas, ya podemos empezar con el análisis de redes neuronales.   
+```{r}
+split_index1 <- sample.split(tequila_red$Don_Julio,SplitRatio = 0.8)
+table(split_index1)
+```
+   
+Aquí separamos la base de datos para tener un conjunto de entrenamiento y otro de prueba, para observar la precisión de los resultados del modelo.    
+```{r}
+set.seed(12345)
+split_index1 <- sample.split(tequila_red$Don_Julio,SplitRatio = 0.8)
+table(split_index1)
+max = apply(tequila_red , 2 , max)
+min = apply(tequila_red, 2 , min)
+scaledminmax1 = as.data.frame(scale(tequila_red, center = min, scale = max - min))
+class(scaledminmax1)
+```
+
+```{r}
+# creating training and test set
+set.seed(12345)
+trainNN<-subset(scaledminmax1,split_index1==T)
+testNN<-subset(scaledminmax1,split_index1==F)
+```
+
+Aquí hacemos 2 nuevas bases de datos para poder integrar los valores de entrenamiento y prueba de manera respectiva y agregamos a las bases el cambio de escalas de valores.
+
+Y tenemos igual el gráfico de nuestra red neuronal, que muestra todos los inputs que estan divididos po las 5 capas, el valores de los bias que son resaltados en azul.
+```{r}
+# fit neural network 
+set.seed(12345)
+NN = neuralnet(Don_Julio ~., data = trainNN, hidden = 5, act.fct = "logistic", linear.output = F)
+class(NN)
+# plot neural network
+plot(NN, rep="best", intercept=T, information = T)
+```
+
+Aquí declaramos la red neuronal con la variable dependiente y las variables independientes de nuestra elección para poder desarrollarla de manera gráfica, utilizamos los datos de entrenamiento y le agregamos 5 capas ocultas para poder mejorar la precisión del modelo y tener mejores resultados.   
+```{r}
+Predict=compute(NN,testNN)
+prob = Predict$net.result
+pred <- as.factor(ifelse(prob>0.5,1,0))
+
+table(pred, testNN$Don_Julio)
+
+confusionMatrix(data = pred, reference = as.factor(testNN$Don_Julio))
+
+```
+Con base en los resultados podemos concluir algunas cosas, estas son:   
+
+- Tenemos 34 observaciones que son Verdades positivas, 1 falso positivo, 1 falso negativo y 16 verdades negativas.   
+
+- El modelo tiene una precisión de 63%, lo cuál es un valor  bueno pero no es superior al de No Information rate.   
+
+- El valor de Kappa es mayor a 0.0571, este valor es mayor a 0, se puede concluir, quiere decir que las predicciones son mejores cuando las muestras son aleatorias.   
+
+- La sensibilidad tiene un valor de 85%, lo cuál nos indica que de todas las observaciones que son verdadero positivo son identificadas de manera correcta.   
+
+- La especificidad es del 20% y la sensibilidad es mayor que al de especificidad, con esto podemos concluir que el modelo es bueno para estimar los verdaderos positivos.   
+   
+Con estos resultados podemos concluir que nuestro modelo de redes neuronales por clasificación es de buena calidad y nos dará resultados de utilidad para poder hacer las mejores predicciones posibles. 
+
+#### Mejor Modelo
+
+Para determinar el mejor modelo, tomaremos en cuenta dos modelos el modelo de árbol de decisión con los hiperparámetros y el modelo de la red neuronal con 5 capas, en esta parte podremos analizar los resultados de las métricas con las que evaluaremos los modelos.
+
+- **Precisión:**
+En la red neuronal el valor obtenido fue de 63%, mientras que para el árbol de decisión es de 60%
+- **Sin tasa de información:**
+El valor obtenido para la red neuronal fue de 75.5% y para el modelo de árbol de decisión es de 65%
+- **Kappa:**
+Para el modelo de red neuronal el valor fue 0.0571, y para el árbol de decisión el valor de -0.039
+- **Sensibilidad:**
+El porcentaje de sensibilidad 85%, el valor del árbol de decisión tiene un valor de 9.5%
+- **Especifidad:**
+El porcentaje de especifidad es de 20%, y el valor para el árbol de decisión es de 87%
+
+Analizando los resultados podemos ver que el mejor modelo es el modelo de árbol de decisión con hiperparámetros, ya que su nivel de precisión es mayor, al igual que su no information rate, el valor de kappa en este modelo es positivo y mayor mientras que para la red neuronal el valor es negativo. Al igual tiene un mejor nivel de sensiblidad, sin embargo para la especificidad es menor, en este caso el modelo de redes neuronales si mejor en la especifidad, sin embargo sobre todo en los resultados fueron mejor para el modelo de árbol de decisión.
+
+### Modelos de Regresión con Lealtad hacia la marca
+
+#### Árboles de decisión
+
+La respuesta final es L9 que se refiere a la lealtad de la marca (numérico: del 1 al 7, output target)   
+```{r}
+setwd("/Users/gustavoacosta/Desktop/5 semestre/míneria_de_datos")
+tequila2 <- read_excel("tequila.xlsx")
+tequila2 <- tequila2[,c(-1,-4)]
+```
+
+Aqui podemos ver la distribución de las respuestas a las variables así como podemos ver que solamente las variables de Sexo, Edad, Marca y Don_Julio son de tipo character mientras que las demás son variables numéricas.   
+```{r}
+summary(tequila2)
+```
+
+Con el siguiente código dividimos la información en tres grupos: los de entenamiento, la validación y para la prueba:   
+```{r}
+# Set seed and create assignment for train/validation/test split 
+set.seed(1)
+assignment2 <- sample(1:3, size = nrow(tequila2), prob = c(0.7, 0.15, 0.15), replace = TRUE)
+
+# Create a train, validation and tests from the original data frame 
+tequila_train2 <- tequila2[assignment2 == 1, ]  #subset tequila to training indices only
+tequila_valid2 <- tequila2[assignment2 == 2, ]  #subset tequila to validation indices 
+tequila_test2 <- tequila2[assignment2 == 3, ]   #subset tequila to test indices only
+```
+
+Aquí podemos ver otro modelo de árbol de decisión relacionado con la lealtad del cliente que tiene un total de 6 de ramificaciones, el nodo superior es la variable "L12", que es "Considero a esta marca como mi primera opcion", el valor para comenzar la bifurcaicón de este punto es si el valor es menor a mayor a 5.
+Y la parte final del modelo podemos ver los puntajes que obtienen de lealtad de la variable "L9" conforme a cada ramificación.
+
+```{r}
+# Train the model
+tequila_model2 <- rpart(formula = L9 ~ ., data = tequila_train, method = "anova")
+
+# Look at the model output
+print(tequila_model2)
+```
+
+
+```{r}
+tequila_model2$variable.importance
+```
+
+
+```{r}
+# Plot the tree model
+rpart.plot(x = tequila_model2, yesno = 2, type = 0, extra = 0)
+```
+   
+De acuerdo con el modelo, las 10 variables independientes con mayor importancia para predecir la lealtad del cliente son:   
+
+- **L12:** Me gusta mucho esta marca   
+   
+- **L13:** Prefiero a esta marca que a las demás   
+   
+- **L3:** La próxima vez voy a volver a elegir esta marca   
+   
+- **L4:** Generalmente siempre elijo esta marca   
+   
+- **L5:** Esta marca es mi preferida   
+   
+- **L11:** En el pasado siempre he elegido esta marca   
+   
+- **L2:** Me gusta mucho esta marca   
+   
+- **L8:** Cuando puedo, elijo esta marca   
+   
+- **VP6** Por esta marca pagaría mas que por otras   
+   
+- **VP3:** Lo que recibo de esta marca vale su precio   
+   
+#### Performance of the Model   
+Al generar las predicciones en los detos de entrenamiento y calcular el RMSE, podemos ver que tiene un error de 0.**7485**  
+```{r}
+# Generate predictions on a test set
+pred <- predict(object = tequila_model2, newdata = tequila_test2)
+```
+
+
+```{r}
+# Compute the RMSE
+rmse(actual = tequila_test2$L9, predicted = pred)
+```
+
+#####  Hyperparameters  
+
+Como podemos ver que en el 7 es el que tiene un valor menor   
+```{r}
+# Plot the "CP Table"
+plotcp(tequila_model2)
+```
+   
+Viendo a más detalles, sí podemos concluir que el CP 7 es el que minimiza el error. 
+```{r}
+# Print the "CP Table"
+print(tequila_model2$cptable)
+```
+   
+
+```{r}
+# Retrieve optimal cp value
+opt_index2 <- which.min(tequila_model2$cptable[, "xerror"])
+cp_opt2 <- tequila_model2$cptable[opt_index2, "CP"]
+
+# Prune the model (to optimized cp value)
+tequila_model_opt2 <- prune(tree = tequila_model2, 
+                         cp = cp_opt2)
+
+tequila_model_opt2$variable.importance
+```
+
+Usando los nuevos parámetros podemos obsrvar el nuevo árbol:   
+En esta parte del modelo también podemos ver un modelo de árbol de decisión similar al anterior relacionado con la lealtad y cuenta con un total de 5 ramificaciones, donde el nodo principal es L12 "Considero a esta marca como mi primera opcion" donde las opciones puede ser mayor o menor a 5
+
+```{r}
+# Plot the optimized model
+rpart.plot(x = tequila_model_opt2, yesno = 2, type = 0, extra = 0)
+```
+   
+Ahora podemos ver como el RMSE es de 0.787 a eliminar la rama de DP6 sobre si el tamaño del envase les pareció adecuado o no. Por lo que al minimizar el error, podemos eliminar esa variable para el modelo   
+```{r}
+# Generate predictions on a test set
+pred_opt2 <- predict(object = tequila_model_opt2,   # model object 
+                newdata = tequila_test2)  # test dataset
+
+# Compute the RMSE
+rmse(actual = tequila_test2$L9, predicted = pred_opt2)
+```
+
+De esta manera se puede observar el árbol final:
+Que cuenta con un total de 5 ramificaciones, lo que simplificará el poder observar la toma de decisiones, el nodo principal se mantiene igual que es la variable 12 y también sigue siendo relacionado con la variable de lealtad.
+```{r}
+rpart.plot(x = tequila_model_opt2, yesno = 2, type = 0, extra = 0)
+```
+   
+### Grid Search for hyperparameter selection for minsplit and maxdepth
+```{r}
+# Establish a list of possible values for minsplit and maxdepth
+minsplit2 <- seq(1, 4, 1)
+maxdepth2 <- seq(1, 6, 1)
+
+# Create a data frame containing all combinations 
+hyper_grid2 <- expand.grid(minsplit = minsplit2, maxdepth = maxdepth2)
+
+# Check out the grid
+head(hyper_grid2)
+```
+
+
+```{r}
+# Print the number of grid combinations
+nrow(hyper_grid2)
+
+```
+```{r}
+hyper_grid2
+```
+
+
+```{r}
+# Number of potential models in the grid
+num_models <- nrow(hyper_grid2)
+
+# Create an empty list to store models
+tequila_models2 <- list()
+
+# Write a for loop over the rows of hyper_grid to train the grid of models
+for (i in 1:num_models) {
+
+    # Get minsplit, maxdepth values at row i
+    minsplit2 <- hyper_grid2$minsplit[i]
+    maxdepth2 <- hyper_grid2$maxdepth[i]
+
+    # Train a model and store in the list
+    tequila_models2[[i]] <- rpart(formula = L9 ~ ., 
+                               data = tequila_train2, 
+                               method = "anova",
+                               minsplit = minsplit2,
+                               maxdepth = maxdepth2)
+    }
+```
+
+```{r include=FALSE}
+tequila_models2
+```
+
+### Evaluation of the best model on the Validation Split   
+En esta parte lo que se busca es poder saber cual de los modelos creados se puede obtener un árbol de decisión con el menor margen de error con ayuda de los hiperparametros.   
+```{r}
+# Create an empty vector to store RMSE values
+rmse_values2 <- c()
+
+# Write a for loop over the models to compute validation RMSE
+for (i in 1:num_models) {
+
+    # Retrieve the i^th model from the list
+    model2 <- tequila_models2[[i]]
+    
+    # Generate predictions on grade_valid 
+    pred <- predict(object = model2,
+                    newdata = tequila_valid2)
+    
+    # Compute validation RMSE and add to the 
+    rmse_values2[i] <- rmse(actual = tequila_valid2$L9, 
+                           predicted = pred)
+}
+
+# Identify the model with smallest validation set RMSE
+best_model2 <- tequila_models2[[which.min(rmse_values2)]]
+
+# Print the model paramters of the best model
+best_model2$control
+```
+
+Comparando ambos modelos de árbol de decisión, podemos concluir que el mejor modelo es este, donde ya aplicamos los hiperparámetros y pudimos reducir ael RMSE de 0.89 a 0.88, además que tiene un número de ramificaciones adecuadas para poder observar la toma de decisiones
+```{r}
+# Compute test set RMSE on best_model
+pred <- predict(object = best_model2,
+                newdata = tequila_test2)
+rmse(actual = tequila_test2$L9, 
+     predicted = pred)
+```
+Aquí tenemos el mejor modelo de árbol de decisión pero utilizando los hiperparamétros que ayuda a disminuir el margen de error, cuenta con 6 ramificaciones, y el nodo principal sigue siendo el mismo que el anterior, así como el resultado final se relaciona con la variable de lealtad.
+```{r}
+best_model2$variable.importance
+```
+
+
+```{r}
+rpart.plot(x = best_model2, yesno = 2, type = 0, extra = 0)
+```
+   
+Con el valor de RMSE de ambos modelos podemos concluir que el mejor modelo para el árbol de decisión es el modelo 2 que tiene un valor de 0.899 en comparación del modelo 1 que tiene un valor de RMSE 0.91, escogimos ese modelo ya que apesar que la diferencia es muy pequeña ayudara para la toma de decisiones con este modelo y una mayor precisión.   
+
+### Red Neuronal: Regresión   
+
+A continuación se hará una red neuronal para los datos, donde se incluyeron algunas interpretaciones como:
+
+1. Una columna donde el 0 es para masculino y el 1 para feminino
+2. Agrupación de edades por grupos de 18-21 años (0), 22-25 años (1) y 26-30 años (2)
+3. Para las marcas, con el fin de hacer enfoque en la marca Don Julio, esta marca representa el 1 y 0 las demás
+```{r}
+setwd("/Users/gustavoacosta/Desktop/5 semestre/míneria_de_datos")
+tequila3 <- read_excel("tequila_2.xlsx")
+tequila3 <-tequila3[c(-1, -4, -44)]
+```
+
+**División de los datos**
+Dividimos los datos para entrenamiento y prueba
+```{r}
+split_index_reg3 <- sample.split(tequila3$L9,SplitRatio = 0.8)
+table(split_index_reg3)
+```
+```{r}
+tequila_train_reg_3<- subset(tequila3,split_index_reg3==T)
+tequila_test_reg_3 <- subset(tequila3,split_index_reg3==F)
+```
+En esta parte escalamos las variables para que todas estén bajo las mismas escalas de valores, y visualizamos los resultados.
+```{r}
+## Scale data for neural network
+max = apply(tequila3, 2, max)
+min = apply(tequila3, 2, min)
+scaledminmax_reg3 = as.data.frame(scale(tequila3, center = , scale = max - min))
+```
+
+Creamos la red neuronal con los datos de entrenamiento y de prueba: 
+```{r}
+set.seed(12345)
+# creating training and test set
+trainNN3<-subset(scaledminmax_reg3,split_index_reg3==T)
+testNN3<-subset(scaledminmax_reg3,split_index_reg3==F)
+summary(trainNN3)
+```
+
+Asi podemos ver una red neuronal de 3 capas con solamente 7 variables en la red neuronal:
+
+- TDR 
+- L12 
+- L13 
+- VP4 
+- DP4 
+- VP1
+- DP3
+
+```{r}
+# fit neural network 3 layers
+NN_reg3 = neuralnet(L9 ~ TDR + L12 + L13 + VP4 + DP4 + VP1 + DP3, data = trainNN3, hidden = 3, linear.output = T)
+# plot neural network
+plot(NN_reg3, rep="best", intercept=T, information = T)
+```
+
+Aquí podremos observar las predicciones y la evaluación del modelo
+
+```{r}
+set.seed(12345)
+#Evaluation
+predict_reg3 <- compute(NN_reg3, testNN3)
+pred_reg3 <- predict_reg3$net.result
+
+errorNN_reg3 <- testNN3$L9-pred_reg3
+errorNN_reg3 <- as.matrix(errorNN_reg3)
+rmseNN3<-sqrt(mean(errorNN_reg3^2))
+rmseNN3 
+```
+
+- **RMSE:** 0.1640
+
+#### Elección del mejor modelo
+De modelos de regresión pudimos observar que la red neuronal es la que cuenta con un menor RMSE, es por eso que lo escogemos como mejor modelo ya que podría ser el modelo preciso.
+
+### Por qué creen que el modelo de regresión da muy bien, pero el de clasificación no?
+Podemos ver que el número de regresión es menor en el modelo de regresión ya que cuenta con una menor cantidad de variables y es más preciso la relación de las variables.
+
+### Modelos Simplificados
+
+Lo que se mostrara en esta parte son los mejores modelos tanto del modelo de regresión como de clasificación según sea el caso.
+Se tomarán 6 variables para que sea más preciso y tener el menor RMSE posible.
+
+Las variables a tomar en cuenta son
+
+1. Sexo
+
+2.  Edad
+
+3. TDR: *"De las ultimas tres ocasiones en las que ha tomado tequila, ¿Cuántas de estas veces ha tomado la marca seleccionada?"*
+
+4. VP4: *"Pagaría mas dinero por esta marca que por otras"*
+
+5. DP4: *"El grado de alcohol del tequila era adecuado"*
+
+6. DP3: *"La textura del tequila era adecuada"*
+
+#### Modelo de Clasificación: Árbol de Decisión
+
+```{r}
+setwd("/Users/gustavoacosta/Desktop/5 semestre/míneria_de_datos")
+tequila_5<- read_excel("tequila_1.xlsx")
+tequila_5 <-tequila_5[,c(-1,-4)]
+```
+
+Aquí podemos ver las variables de nuestro modelo y su significancia dentro del modelo, podemos inferir que la varible más significante es **VP4** y la menos es **Sexo**.
+
+```{r}
+tequila_model_5 <- rpart(Don_Julio ~ Sexo + Edad + TDR + VP4 + DP4 + VP1 + DP3, data = tequila_5, method = "class")
+tequila_model_5$variable.importance
+```
+
+#### Splitting Data
+
+Aquí dividimos nuestros datos en datos de entrenamiento y prueba en un 80% y 20%.
+```{r}
+#Train/Test split
+# Total number of rows in the credit data frame
+n_5 <- nrow(tequila_5)
+
+# Number of rows for the training set (80% of the dataset)
+n_train5 <- round(0.8 * n_5) 
+
+# Create a vector of indices which is an 80% random sample
+set.seed(123)
+train_indices_5 <- sample(1:n_5, n_train5)
+
+# Subset the credit data frame to training indices only
+tequila_train_5 <- tequila_5[train_indices_5, ]  
+  
+# Exclude the training indices to create the test set
+tequila_test_5 <- tequila_5[-train_indices_5, ]   
+```
+
+Aqui vemos la parte de el entrenamiento del modelo
+```{r}
+# Train the model (to predict 'DON_Julio')
+tequila_model_5 <- rpart(formula = Don_Julio ~ Sexo + Edad + TDR + VP4 + DP4 + VP1 + DP3, data = tequila_train_5, method = "class")
+
+# Look at the model output                      
+print(tequila_model_5)
+```
+
+Con estos resultado podemos inferir que las variables más significantes en el modelo de entrenamiento son
+- TDR: Últimas tres ocasiones en las que ha tomado tequila
+- VP4:Se consideran que el grado de alcohol del tequila era adecuado
+- DP3: La textura del tequila era adecuada
+```{r}
+tequila_model_5$variable.importance
+```
+ La variable de mayor importancia y más peso es la textura del tequila (DP3)
+ 
+```{r}
+tequila_model_5_1 <- rpart(formula = Don_Julio ~ Sexo + Edad + TDR + VP4 + DP4 + VP1 + DP3, 
+                       data = tequila_train_5, 
+                       method = "class",
+                       parms = list(split = "information"))
+```
+ 
+#### Hiperpárametros
+En esta parte aplicaremos hiperparámetros con el fin de crear un modelo que tenga un menor RMSE y una menor cantidad de ramificaciones
+```{r}
+plotcp(tequila_model_5)
+```
+
+```{r}
+# Print the "CP Table"
+print(tequila_model_5$cptable)
+```
+
+```{r}
+# Retrieve optimal cp value based on cross-validated error
+opt_index_5 <- which.min(tequila_model_5_1$cptable[, "xerror"])
+cp_opt_5 <- tequila_model_5$cptable[opt_index_5, "CP"]
+
+# Prune the model (to optimized cp value)
+tequila_model_opt_5 <- prune(tree = tequila_model_5, 
+                         cp = cp_opt_5)
+
+tequila_model_opt_5$variable.importance
+```
+Aquí podemos observar nuestro modelo en el área de clasificación que es nuestro árbol de decisión, tiene un total de 2 ramas y es a partir del nodo principal que es "Sexo" y después las variable:
+
+- DP3:"La textura del tequila era adecuada"
+```{r}
+# Plot the optimized model of the train model
+rpart.plot(x = tequila_model_opt_5, yesno = 2, type = 0, extra = 0)
+```
+
+Ahora vemos el modelo de clasificación en la matriz de confusión
+```{r}
+# Generate predictions on a test set
+class_prediction_5 <- predict(object = tequila_model_opt_5, newdata = tequila_test_5, type = "class")     
+
+# Calculate the confusion matrix for the test set
+confusionMatrix(data = class_prediction_5, reference = as.factor(tequila_test_5$Don_Julio))
+```
+Ya habiendo aplicado los hiperparámetros podemos concluir lo siguiente, las métricas que tomaremos ceuenta para el modelos son:
+
+- Precisión: 58 %
+- Kappa: -0.0417
+- No information rate: 88%
+- Sensibilidad: 14.2%
+- Especificidad: 82.05%
+
+Con esto podemos inferir que este modelo es mejor para estimar los valores verdaderos, ya que nuestro valor de Specificity es mayor al de sensitivity.
+
+#### Modelo de Regresión: Red Neuronal
+
+Volvemos a recordar algunos cambios que hicimos para poder hacer el modelo de la red neuronal
+
+1. Una columna donde el 0 es para masculino y el 1 para feminino
+2. Agrupación de edades por grupos de 18-21 años (0), 22-25 años (1) y 26-30 años (2)
+3. Para las marcas, con el fin de hacer enfoque en la marca Don Julio, esta marca representa el 1 y 0 las demás
+
+```{r}
+setwd("/Users/gustavoacosta/Desktop/5 semestre/míneria_de_datos")
+tequila6 <- read_excel("tequila_2.xlsx")
+tequila6 <-tequila6[c(-1, -4, -44)]
+```
+
+Primero dividamos la base de datos entre los datos de entrenamiento y los de prueba con sus respectivos pocentajes de 80% y 20%
+```{r}
+# Random sampling for training and testing
+split_index_reg_2 <- sample.split(tequila6$L9,SplitRatio = 0.8)
+table(split_index_reg_2)
+```
+
+Después escalamos nuestras variables
+
+```{r}
+set.seed(12345)
+tequila_train_reg_3<- subset(tequila6,split_index_reg_2==T)
+tequila_test_reg_3 <- subset(tequila6,split_index_reg_2==F)
+```
+```{r}
+max = apply(tequila6, 2, max)
+min = apply(tequila6, 2, min)
+scaledminmax_reg_2 = as.data.frame(scale(tequila6, center = , scale = max - min))
+```
+
+Ahora creamos la red neuronal con los datos de **entrenamiento y prueba**
+```{r}
+set.seed(12345)
+trainNN3_1<-subset(scaledminmax_reg_2,split_index_reg_2==T)
+testNN3_1<-subset(scaledminmax_reg_2,split_index_reg_2==F)
+```
+En esta parte podemos observar nuestra red neuronal dividida en tres capas con todas las variables del modelo
+```{r}
+# fit neural network 3 layers
+NN_3 = neuralnet(L9 ~ ., data = trainNN3_1, hidden = 3, linear.output = T)
+# plot neural network
+plot(NN_3, rep="best", intercept=T, information = T)
+```
+
+Procedemos a realizar predicciones para conocer y visualizar el RMSE de la red neuronal
+
+- **RMSE:**  0.18043
+```{r}
+set.seed(12345)
+#Evaluation
+predict_reg_2 <- compute(NN_3, testNN3_1)
+pred_reg_2 <- predict_reg_2$net.result
+
+errorNN_reg_2 <- testNN3_1$L9-pred_reg_2
+errorNN_reg_2 <- as.matrix(errorNN_reg_2)
+
+rmseNN3<-sqrt(mean(errorNN_reg_2^2))
+rmseNN3
+```
+
+### Comparación de modelos:
+
+- Modelo de Clasificación: El valor obtenido en el RMSE fue de 0.1590
+
+- Modelo de Regresión: El valor obtenido en el RMSE fue de 0.1840
+
+Ya que nuestro modelo de clasificación que fue el árbol de decisión tiene un menor RMSE podemos inferir que es el mejor modelo
+
+### Interpretación de modelos finales
+
+A continuación recordaremos un poco las métricas de ambos modelos tanto de clasificación como de regresión, primero compararemos la diferencia de métricas de nuestro modelo de árbol decisión con todas las variables y en donde solamente utilizamos siete variables.
+
+- Modelo de Árbol de Decisión: Todas las variables
+
+```{r}
+df <-data.frame(
+"Accuracy" = c("58.3%"),
+"NIR" = c("0.887"),
+"Kappa" = c("-0.0417"),
+"Sensitivity" = c("0.1429"),
+"Specificity" = c("0.8205")
+  )
+df
+```
+
+- Modelo de Árbol de Decisión: Seis Variables
+
+```{r}
+df1 <-data.frame(
+"Accuracy" = c("65%"),
+"NIR" = c("0.559"),
+"Kappa" = c("0.0789"),
+"Sensitivity" = c("0.1429"),
+"Specificity" = c("0.9231")
+  )
+df1
+```
+Ya que podemos visualizar ambas métricas, inferimos que en cuanto a la precisión del modelo el, modelo de las seis variables tiene un mayor porcentaje, por ende un mejor nivel de precisión.
+En cuanto al kappa el modelo de las 6 variables sigue teniendo un mayor valor y es positivo, sin embargo en ambos de nuestros modelos, siguen siendo pequeños valores.
+Para especificidad vuelve a destacar el valor del modelo de las 6 variable por lo que tambien sirven para estimar valores negativos y en cuanto a la sensibilidad ambos tienen el mismo valor. Con esto podemos concluir que el modelo de las seis variables es mejor por que tiene mayor precisión.
+
+- Comparación de modelos de regresión
+
+En este caso compararemos ambos modelos de regresión tanto de nuestro modelo simplificado como el de todas las variables, es por eso que compararemos sus **RMSE**, con el fin de escoger el modelo más precisio con un menor margen de error.
+```{r}
+df3 <-data.frame(
+"RMSE" = c("Modelo Simplificado: 0.18043 ", "Modelo Todas variables: 0.1640")
+  )
+df3
+```
+
+Al poder visualizar lor RMSE concluimos que el mejor modelo es el modelo con todas las variables ya que tiene un margen de error menor.
+
+## Conclusión
+
+Con el ánalisis para las industria tequilera que hemos hecho nos pudimos percatar de la importancia de las redes neuronales y los árboles de decisión dentro de la vida cotidiana y el uso que puede emplear dentro de las empresas, por ejemplo para los árbol de decisión pudimos observar como determinar el proceso de elección de marca y la lealtad de un consumidor con base a variables externas que pueden afectar y las opioniones que tienen sobre la marca; el utilizar este tipo de modelos trae algunos beneficios como lo es explicar el comportamiento de la toma de decisiones, reduce el número de variables independientes y puede ser una herramienta para gestión empresarial.
+Por el otro lado tenemos a las redes neuronales, que aportan con la capacidad de poder aprender tareas a través de un entrenamiento inicial, quiere decir que ayudan a interpretar los datos y entenderlos sin importar el tipo de dato ya sean imagénes, voz y texto . En este caso podemos observar que nos ayuda a identificar patrones entre las variables, como lo fue para los modelos relacionados con la lealtad.
+
+### Párrafo de interpretación de tus modelos finales y conclusiones
+En cuanto al modelo de clasificación sobre si es la Marca Don Julio u Otra, el mejor modelo es aquel que contiene las variables independientes de Sexo, Edad, TDR, VP4, DP4, VP1 y DP3 donde el modelo cuenta con 9 ramas donde se pueden ver las siguientes métricas de evaluación:   
+
+- **Accuracy:** 0.60 significando que el modelo tiene un 60% de accuracy   
+
+- **Confusion Matrix:** de acuerdo con la matriz se predijeron que fueran _Don Julio_ 5 que en realidad fueron Otra y se predieron que 19 fueran _Otra_ cuando era Don Julio
+
+- **Kappa Metric:** tiene un valor de -0.039   
+
+En cuanto al modelo de regresión para predecir la lealtad del cliente, el mejor modelo es aquel que contiene las variables independientes de Edad, Sexo, Marca, TDR, L12, L13 y L3 donde el modelo cuenta con 6 ramas donde se pueden ver que el RMSE es de 0.9789353   
+ 
+
+# SP3: Explorando Tweets sobre vacunación COVID-19
+
+## Introducción
+
+Con el avance de la pandemia, llego el surgimiento de las vacunas con esto la aplicación de ellas a los habitantes de la sociedad, sin embargo algunas de las personas comenzaron a dudar sobre las vacunas y los efectos que traen el aplicarlas, los antivacunas suelen informar de manera negativa a otros miembros de la sociedad y rechazan el poder aplicarse la vacuna.
+Es por eso que la compañía farmaceútica **"Pfizer-BioNTech"** siendo una la vacuna más utilizada, decidio hacer un análisis a través de tweets para conocer los comentarios de la gente y sus opiniones con respecto a la vacunación.
+
+## Desarrollo
+ 
+**Carga de Base de datos**
+```{r}
+setwd("/Users/gustavoacosta/Desktop/5 semestre/míneria_de_datos")
+covidtweets <- read.csv("vaccination_tweets.csv")
+```
+**Librerías**
+```{r}
+pacman::p_load(rtweet, 
+               dplyr, 
+               ggplot2,  
+               sf, 
+               usmap,
+               reshape2,
+               tm,
+               syuzhet,
+               tidytext,
+               ggwordcloud,
+               SnowballC,
+               wordcloud,
+               RColorBrewer,
+               readr,
+               readxl)
+```
+
+#### Ánalisis Exploratorio
+
+- Primero observamos las fuentes principales recopiladas de estos tweets
+```{r}
+unique(covidtweets$source)
+```
+
+- Aquí podemos observar el % de usuarios verificados que en este caso es la mínoria de 8.52%
+
+```{r}
+data1 <- freq(covidtweets$user_verified)
+```
+
+- Y algunas estadísticas descriptivas de el número de seguidores y amigos
+
+1. Media para número de seguidores: 34, 870
+2. Media para número de amigos: 1175
+```{r}
+summary(covidtweets$user_followers)
+summary(covidtweets$user_friends)
+```
+
+### De acuerdo a los tweets recolectados, ¿Cuáles son los términos mas relevantes que las personas mencionan cuando hablan de la vacuna Pfizer-BioNTech?
+
+Antes de que podamos hacer una nube de palabras, es necesario modificar un poco nuestros datos. Primero necesitamos tokenizar el texto . A continuación, eliminamos todas las "palabras vacías" y palabras que podrían afectar lo que buscamos dentro del texto
+```{r}
+exclution <- tibble(word = c("http", "https", "twitter", "t.co", "amazon", "amp", "gt", "â", "iâ", "1", "2", "3", "2066", "2069", "5", "fe0f", "lt","coronavirus", "COVID", "covid", "covid-19","covid19","vaccine","vaccination","pfizer","biontech","pfizerbiontech","dose","19","vaccines","vaccinated","doses","dose","moderna","johnson","shot","pfizervaccine","covidvaccine","people","2nd","received","astrazeneca","1st","jab","day","covid19vaccine","fda","health","mrna","2021","12","data","world","study","arm","receive","million","news","time","approved","eu","days","week","covid_19","i’m","hours","science","uk","israel","it’s","weeks","finally","yesterday","feeling","post","safety","effects","100","4","15","pfizercovidvaccine","announced","dr","covidvaccination","you’re"))
+```
+
+En esta parte tokenizamos nuestros datos y podemos ver las primeras líneas de algunas palabras dentro de nuestros datos
+```{r}
+tweet_token <- lat_lng(covidtweets)
+word_token <- tweet_token %>% 
+  select(id, text) %>% 
+  tidytext::unnest_tokens(word, text) %>% 
+  anti_join(stop_words) %>% 
+  anti_join(exclution)
+```
+
+
+```{r}
+head(word_token, 10)
+```
+
+Ahora veremos la frecuencia de las palabras de manera descendiente
+
+```{r}
+word_token_count <- word_token %>% 
+  count(word, sort = TRUE)
+head(word_token_count,30)
+```
+#### Word cloud
+En esta parte podemos ver los términos más utilizados, ya que excluimos ciertas palabras, las tres palabras más frecuentes son **Effective, approval, grateful**
+```{r}
+set.seed(2020)
+word_token_count %>% 
+  top_n(30) %>% 
+  ggplot(aes(label = word, size = n, color = word)) +
+  scale_size_area(max_size = 10) +
+  geom_text_wordcloud() +
+  theme_minimal()
+```
+
+### ¿Cuáles son los sentimientos y emociones expresados por la opinión pública sobre la vacuna Pfizer-BioNTech?
+Con la siguiente función se clasificarán las palabras conforme si la palabra se percibe negativo o positivo.
+Asi mismo podemos ver los sentimientos que son percibidos dentro del texto:
+```{r}
+tweets_sent <- covidtweets$text %>% 
+    get_nrc_sentiment()
+names(tweets_sent)
+```
+#### Plutchik's wheel of emotions analysis
+A continuación podemos observar de manera más gráfica la frecuencia de estos sentimientos con respecto a los tweets, nuestra muestra es alrededor de *4,000* tweets y la mayor parte de estos son percibidos por el sentimiento de **confianza** seguidos de **anticipación** y **miedo**.
+Con esto podemos encontrar que si hay gran parte de los usuarios de twitter que siente miedo con respecto al proceso de vacunación
+```{r}
+tweets_sent %>% 
+  summarize_all(sum, na.rm = TRUE) %>% 
+  select(-negative, -positive) %>% # Dropping these helps in plotting
+  reshape2::melt() %>% 
+  ggplot(aes(reorder(variable, -value), value)) +
+  geom_col(fill="pink") +
+  labs(x = "Sentiment", y = "Frequency of Words") +
+  theme_minimal()
+```
+
+#### Plot only positive and negative sentiments (basic polarity)
+En este gráfico juntamos y clasificamos solamente en sentimientos positivos y negativos, observamos que la mayor parte de los tweets se relacionan con sentimientos **positivos**
+```{r}
+tweets_sent %>% 
+  summarize_all(sum, na.rm = TRUE) %>% 
+  select(negative, positive) %>% 
+  reshape2::melt() %>% 
+  ggplot(aes(reorder(variable, -value), value)) +
+  geom_col(fill="lightblue") +
+  labs(x = "Sentiment", y = "Frequency of Words") +
+  theme_minimal()
+```
+
+#### Linear regression
+Con base a estos resultados podemos inferir que las variables más significativas son *alegría, usuarios verificados, seguidores de usuarios*
+```{r}
+cbind(covidtweets, tweets_sent) %>% 
+  mutate(favorite_count = user_favourites + 1) %>% 
+  lm(log(favorite_count) ~ anger + anticipation + disgust + fear + joy +
+             sadness + surprise + trust + user_verified + log(user_followers+1),
+           data = .) %>% 
+  summary()
+```
+
+**¿Qué es lo que más recibe retweets?**
+
+En este caso podemos observar que las dos variables que afectan y motivan el dar retweet son:
+
+- Si el usuario esta verificado
+- El número de seguidores que tiene la cuenta
+
+```{r}
+cbind(covidtweets, tweets_sent) %>% 
+  mutate(retweet_count = retweets + 1) %>% 
+  lm(log(retweet_count) ~ anger + anticipation + disgust + fear + joy +
+             sadness + surprise + trust + user_verified + log(user_followers+1),
+           data = .) %>% 
+  summary()
+```
+En esta parte observaremos los valores máximos de los sentimientos y los tweets correspondientes a estos valores:
+```{r}
+summary(tweets_sent)
+max <- cbind(covidtweets, tweets_sent)
+```
+**El tweet con mayor sentimiento de ira**
+EL valor máximo destinado para ira es 1558 y lo obtuvo el siguiente tweet:
+```{r}
+which.max(max$anger)
+print(max$text[1558])
+```
+
+**El tweet con mayor sentimiento de alegría**
+EL valor máximo destinado para ira es 2734 y lo obtuvo el siguiente tweet:
+```{r}
+which.max(max$joy)
+print(max$text[2734])
+```
+
+**El tweet con mayor sentimiento de miedo**
+EL valor máximo destinado para ira es 1558 y lo obtuvo el siguiente tweet:
+```{r}
+which.max(max$fear)
+print(max$text[2908])
+```
+
+### ¿Cuáles son los principales topicos que la opinión pública expresa sobre la vacuna Pfizer-BioNTech?
+Dentro de esta parte integraremos la función de Topic modeling, una función de machine learning que nos ayudará analizar clusters para los datos de texto
+```{r include=FALSE}
+pacman::p_load(dplyr, 
+               ggplot2, 
+               tm, # For textmining 
+               topicmodels,
+               here,
+               knitr)
+```
+
+Primero tenemos que obtener solamente los datos de texto y separarlos con respecto a los demás
+```{r}
+tweets2_text <- covidtweets %>% pull(text)
+```
+
+Quitamos algunas de las palabras, espacios y caractéres que no queremos afecten nuestro análisis
+```{r include=FALSE}
+rev_corpus <- tm::Corpus(VectorSource(tweets2_text)) %>% 
+  tm_map(content_transformer(tolower)) %>% 
+  tm_map(removeWords, c(stopwords("english"), "pfizervaccine","pfizerbiontech", "vaccin", "dose", "covid", "pfizer", "covidvaccin","coronavirus", "corona","pfizer","vaccin","covidvaccine","pfizervaccine", "coronavirus", "dose")) %>% 
+  tm_map(removeNumbers) %>% 
+  tm_map(stripWhitespace) %>% 
+  tm_map(removePunctuation, preserve_intra_word_dashes = TRUE)%>% 
+  tm_map(stemDocument)
+```
+
+#### Document term matrix
+
+Dentr de esta parte crearemos una matriz que nos muestre la frecuencia de cada una de las palabras y se eliminarán las palabras que mencionabamos anteriormente cumpliendo con un cierto parámetro que es, si aparecene menos de 100 veces y también otras palabras que se repitan más de mil veces.
+Ya que se eliminaron solamente nos quedarán 125 palabras.
+```{r}
+dtm <- rev_corpus %>% 
+  DocumentTermMatrix(control = list(bounds = list(global = c(100, 10000)))) 
+dim(dtm)
+```
+#### Remove empty documents
+En esta parte estaremos eliminando tweets que son poco comunes y poco relacionados con el resto de los valores outliers.
+Por lo que ahora tenemos 10, 279 registros de tweets
+```{r}
+index_kp <- rowSums(as.matrix(dtm)) > 0
+sum(index_kp)
+```
+
+```{r}
+dtm <- dtm[index_kp, ]
+tweets2_text <- tweets2_text[index_kp]
+```
+
+#### Fitting the LDA
+Ahora incluiremos el LDA en nuestro texto. Para esto usaremos `dtm`. Establecimos que queremos encontrar 5 temas diferentes, donde tomas en cuenta las primeras 3000 interacciones.
+```{r}
+lda_model <- LDA(x = dtm,
+                 k = 5,
+                 method = "Gibbs",
+                 control = list(seed = 5648,
+                                alpha = 0.1,
+                                iter = 3000,
+                                burnin = 100)
+)
+```
+
+#### LDA output
+Aquí podemos encontrar los temas identificados de los tweets, conforme a lo que se nos presenta inferiremos que los temas son
+
+- Topic 5: Información biológica sobre las vacunas y su proceso, así como estudios
+- Topic 2: De aquellas personas que ya han recibido alguna dosis y se sientes satisfechos
+- Topic 3: Aquellas personas que hablan sobre los efectos de la vacuna ya sean positivos o negativos
+- Topic 4: Habla sobre los daots de las personas que han recibido la vacuna
+- Topic 5: Habla sobre la aprovación de las vacunas y las instituciones relacionadas a este proceso
+
+```{r}
+terms(lda_model, 10)
+```
+
+#### Topic distribution
+ En esta parte podría decirse que es otra forma de graficar las distribuciones de probabilidad.
+```{r}
+lda_post <- posterior(lda_model)
+theta <- lda_post$topics
+beta <- lda_post$terms
+```
+ 
+ A continuación observamos observar los resultados con la probabilidad de que los tweets sean sobre los temas que establecimos anteriormente, por ejemplo el tema con mayor probabilidad de aparecer es el tema 2 quue establecimos era 
+ 
+ - Topic 2: De aquellas personas que ya han recibido alguna dosis y se sientes satisfechos
+ 
+```{r}
+colMeans(theta)
+```
+ 
+ En esta parte observamos algo similar a la tabla anterior con respecto a la probabilidad de que aparezca el tweet, por ejemplo también observamos que el tema 5 podría ser el menos probable en aparecer que en este caso lo habíamos definido como:
+ 
+ - Topic 5: Habla sobre la aprovación de las vacunas y las instituciones relacionadas a este proceso
+ 
+```{r}
+theta %>% 
+  as.data.frame() %>% 
+  rename_all(~ paste0("topic", 1:5)) %>%
+  reshape2::melt() %>% 
+  ggplot(aes(value)) +
+  geom_histogram() +
+  scale_x_continuous(limits = c(0, 0.8)) +
+  scale_y_continuous(limits = c(0, 750)) +
+  facet_wrap(~ variable, scales = "free") +
+  labs(x = "Topic Probability", y = "Frequency") +
+  theme_minimal()
+```
+ 
+#### Topic importance
+Aquí analizarermos la importancia de los temas, con respecto a sus probabilidades de que hagan retweet los usuarios sobre estos temas
+```{r}
+setwd("/Users/gustavoacosta/Desktop/5 semestre/míneria_de_datos")
+covidtweets_2<- read.csv("vaccination_tweets.csv")
+```
+
+
+```{r}
+theta_rt <- as.data.frame(theta) %>% 
+  rename_all(~ paste0("topic", 1:5)) %>% 
+  mutate(rt = as.numeric(covidtweets_2$retweets[index_kp],
+                         ordered = TRUE)) %>% 
+  filter(!is.na(rt))
+```
+
+```{r}
+regression_model <- lm(rt ~ topic1+topic2+topic3+topic4+topic5+0, data = theta_rt)
+
+summary(regression_model)
+```
+
+```{r}
+ggplot(theta_rt, aes(x=rt))+geom_bar()
+```
+### Con base a tus análisis previos, ¿qué estrategias sugieres al departamento de Salud para incrementar la disposición de la población a vacunarse?
+
+Como pudimos observar con nuestro *sentiment analysis* la mayor parte de las personas suele tener sentimientos positivos, más sin embargo el sentimiento negativo que identificamos que más personas experimentan es el miedo, y en nuestro word cloud también se puede observar que unas de las palabras que podrían relacionarse con este tema es muertes, efectos y seguridad. Se podría inferir que la fuente del miedo de algunos usuarios es los efecto que pueda generar la vacuna y la seguridad de aplicarlas. 
+Además pudimos observar que uno de los temas menos tocados en el topic modeling es la información biológica de las vacunas, considero que una buena estrategia es el generar documentales sobre el proceso de elaboración de las vacunas y el incluir testimonios en las redes sociales, que cuenten de manera clara y transparente su experiencia con la vacuna y expliquen un poco sobre sus efectos.
+También creo que sería interesante tener un sitio de dudas generales que sean respondidas por profesionales de la salud solamente con respecto a los efectos y aclarar sobre las posibilidades de efectos con la vacuna. 
+
+## Conclusión
+Con esta situación problema pudimos reconocer la importancia de la míneria de datos en texto, y como es muy importante que las empresas actuales no dejen de lado el análisis de sus datos de texto ya que suelen aportar insights relevantes y útiles. Un ejemplo fue con las vacunas que se deseaba buscar las razones principales que los antivacunas no querían vacunarse, y conocer un poco más sobre la opinión general de la sociedad con respecto a las vacunas, encontramos que mayor parte de los usuarios tienen sentimientos positivos con relación a los temas de vacunación y suelen sentir sentimientos como gratitud y alegría.
+También se descubrió que a pesar de que gran mayoría de las personas experimentan cosas positivas, también hay un porcentaje significante que tiene miedo a los temas relacionados de la vacunación.
+Aquí donde vemos las aplicaciones que tiene la míneria de textos, ya que es una manera eficiente de poder encontrar información de manera eficaz, tal vez de recursos muy largos como textos que suelen ser poco considerados para analizar. Además de que ofrece a las organizaciones establecer patrones y extraer conocimientos
+
+
+# Nueva Función
+
+Librerías requeridas:
+- Library Highlight
+- Library Sentimentr
+
+**Función:**
+Identificar de manera mas simple el sentimiento (negativo o positivo) de un texto, subrayando y destacando con un color de acuerdo a como se percibe el texto.
+
+```{r}
+library(highlight)
+library(sentimentr)
+```
+
+Ejemplo:
+
+1. *"El tweet más positivo"*
+```{r}
+print(max$text[2734])%>% 
+  sentiment_by(by = NULL) %>%
+  highlight()
+```
+![](/Users/gustavoacosta/Desktop/positive.png)
+
+2. *"El tweet más negativo"*
+```{r}
+print(max$text[1558])%>% 
+  sentiment_by(by = NULL) %>%
+  highlight()
+```
+![](/Users/gustavoacosta/Desktop/negative.png)
+3. *Tweet con aspectos negativos y positivos*
+
+```{r}
+"my life has become terrible since covid.but i still have some hope left in me" %>% 
+  sentiment_by(by = NULL) %>%
+  highlight()
+```
+
+![](/Users/gustavoacosta/Desktop/ambos.png)
+# Referencias
+
+Urgellés-Molina, A., & Medina-Laverón, M. (2018). Los sistemas de recomendaciones y la transformación de las empresas de medios. Retos y beneficios de las inversiones en Big Data. Editorial GEDISA, 2018.
+
+Albán, G. P. G., Albán, C. G., & Valverde, I. (2018). Sistemas de Recomendaciones: Una herramienta para mejorar la gestion de la informacion en las PYMES. Journal of Science and Research: Revista Ciencia e Investigación. ISSN 2528-8083, 3(CITT2017), 121-127.
+
+Equipo Smartup. (2020, July 3). Incrementa Tus Ventas con Los Sistemas de Recomendación. Blog Smartup. Retrieved November 7, 2021, from https://blog.smartup.es/sistemas-de-recomendacion-ecommerce/.
+
+Monsalve, B. (2010, December 14). El marketing y Los Sistemas de Recomendación. BrainSINS. Retrieved November 7, 2021, from https://www.brainsins.com/es/blog/el-marketing-y-los-sistemas-de-recomendacion/99688.
+
+Renjie, R. Z. H. E., Samamon, K. U. of, & Lixin, L. G. (2010, November 1). The impact of YouTube recommendation system on video views. The impact of YouTube recommendation system on video views | Proceedings of the 10th ACM SIGCOMM conference on Internet measurement. Retrieved November 30, 2021, from https://dl.acm.org/doi/abs/10.1145/1879141.1879193.
+
+Mantymaki, M., Hyrynsalmi, S. y Koskenvoima, A. (2020). ¿Cómo utilizan la analítica las pequeñas y medianas empresas de juegos? Una vista basada en la atención de la analítica de juegos. Fronteras de los sistemas de información , 22 (5), 1163. https://0-doi-org.biblioteca-ils.tec.mx/10.1007/s10796-019-09913-1
+
+A. Miklosik, M. Kuchta, N. Evans y S. Zak, “Hacia la adopción de herramientas analíticas basadas en el aprendizaje automático en el marketing digital”, en IEEE Access , vol. 7, págs.85705-85718, 2019, doi: 10.1109 / ACCESS.2019.2924425.
+
+Enterprise AI. (n.d.). Glossary: Tree-Based Models. Retrieved from: https://c3.ai/glossary/data-science/tree-based-models/
+
+Redyk. (2021). Distinguish between Tree-Based Machine Learning Algorithms. Retrieved from: https://www.analyticsvidhya.com/blog/2021/04/distinguish-between-tree-based-machine-learning-algorithms/
+
+Patel, A. (2018). Advantages of Tree-Based Modeling. Retrieved from: https://www.summitllc.us/blog/advantages-of-tree-based-modeling
+
+CICA. (s.f). Características de las redes neuronales. Características de las redes neuronales. Retrieved November 18, 2021, from https://thales.cica.es/rd/Recursos/rd98/TecInfo/07/capitulo3.html .
+
+IBM. (2021). El modelo de redes neuronales. El Modelo de Redes neuronales. Retrieved November 18, 2021, from https://www.ibm.com/docs/es/spss-modeler/SaaS?topic=networks-neural-model
+
+Pardo, C. (2020). ¿Qué son las redes neuronales y cómo se aplican? Innovación de Enzyme. Retrieved November 18, 2021, from https://blog.enzymeadvisinggroup.com/redes-neuronales-que-son-y-aplicaciones.

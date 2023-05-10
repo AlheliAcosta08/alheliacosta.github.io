@@ -1,0 +1,538 @@
+---
+title: "Evidence2: Time Series Model Report"
+author: "Alhelí Acosta- A01382195"
+date: "9/9/2021"
+output: 
+  html_document:
+    theme: spacelab
+    code_folding: hide
+    toc: true
+    number_sections: TRUE
+    toc_depth: 3
+    toc_float: 
+      smooth_scroll: FALSE
+      collapsed: FALSE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+library("readxl")
+library("tidyverse")
+library("lubridate")
+library("scales")
+library("ggplot2")
+library("hrbrthemes")
+library("extrafont")
+library("pastecs")
+library("dbplyr")
+library("funModeling")
+library("Hmsc")
+library("regclass")
+library("stargazer")
+library("jtools")
+library("effects")
+library("huxtable")
+library("Metrics")
+library("ggstance")
+library("readxl")
+library("lme4")
+library("corrplot")
+library("lubridate")
+library("caret")
+library("lmtest")
+library("xts")
+library("zoo")
+library("tseries")
+library("stats")
+library("forecast")
+library("astsa")
+library("AER")
+library("vars")
+library("mFilter")
+library("TSstudio")
+```
+
+```{r}
+setwd("/Users/gustavoacosta/Desktop/5 semestre/intro econometrics/datasets1")
+dir()
+cocacolasales_new <- read_excel("updated_cocasales_data.xlsx")
+cocacolasales_new2 <- read_excel("updated_cocasales_data.xlsx", sheet = "tseries3 - GDL" )
+```
+
+# Introduction
+
+**How time series Analysis is useful to forecast an outcome?**
+
+Within this second evidence we will be employing Time Series Analysis, a useful tool for forecasting,in what way?, well it is use to forecast because it shows how the data changes over lapse of time as well we can identify in which direction the data is changing and observe trends from the collected data from specific unit of analysis over period of time.
+
+# Background
+
+Our Problem Situation is based on Coca-Cola Femsa , a multinational Mexican enterprise that takes part of the beverages industry,currently they are one of the biggest bottling companies in Latin America, they  offer their services in 10 Latin countries and the Philippines. According to their Financial reports from 2015 to 2018, shows that they've had the biggest quantity of sales from unit boxes during March and May 2018, and the lowest in Jan-Mar 2017, during the last year of the financial report the sales haven't been so consistent.
+
+
+# Description of the problem situation
+
+In this evidence our main objective is to analyze how the seasonal phenomena affects the sales of unit sales boxes and how does it respond to this seasons such as summer and winter, etc. We will create regression models and time series based on the behavior of certain components and select a predictive model in order to help us to estimate sales taking in consideration the different components of a time series data. 
+
+# Data and Methodology
+
+Dependent Variable:
+
+- Sales Unit boxes
+
+Independent Variables:
+- Date (time)
+
+## **Data Sources and study period**
+
+The data set we will be using is about coca cola femsa through the years 2015- 2018 but is divided monthly, where we have our dependent variable, that we take in special consideration for forecasting, unit sales of boxes, we also have other independent variables we can analyze seasonally like the weather.
+
+## **Exploratory Data Analysis**
+```{r}
+cocacolasales_new$date=as.yearmon(cocacolasales_new$date,format="%Y/%m")
+```
+Here we have a quick overview from the data set, where we will find the descriptive statistics from the data set such as mean, mean absolute difference of the variables, datatypes and nulls.
+```{r}
+basic_eda <- function(data)
+{
+  glimpse(data)
+  df_status(data)
+  freq(data) 
+  profiling_num(data)
+  plot_num(data)
+  describe(data)
+}
+basic_eda(cocacolasales_new)
+```
+Then, we will see  some visualizations as plots for the first sheet of our data set which contains, two variables sales unit boxes and the date monthly from **2015-2018**
+
+**Plot 1**
+
+In this plot we can see the Sales Unit boxes from Coca Cola and we observe a path that changes over time, we observe some decreasing peaks in several years that affects the constant behavior of the unit sales boxes in all four years from the time series data.
+```{r}
+plot(cocacolasales_new$date,cocacolasales_new$ccsales_unit_boxes, type="l",col="blue", lwd=2, xlab ="Date",ylab ="Sales", main = "Coca Cola Femsa Sales Unit")
+```
+
+**Alternative TS Plot 2**
+
+Here is an alternative plot to analyze the behavior of the unit sales boxes.
+The difference form this plot and the last one is we can see more specifically the dates by months
+an identify more easily identify the low peaks that impact on the sales for example around February 2016,2017 and 2018
+
+```{r}
+plot1xts<-xts(cocacolasales_new$ccsales_unit_boxes,order.by=cocacolasales_new$date)
+plot(plot1xts)
+```
+
+## 2 Set of Visualizations
+This second set of visualizations is for the data set we will be using for the model VAR, here we have a quick overview of the variables we have and sum descriptive statistics for each column.
+
+Dependent Variable:
+
+- Sales Unit boxes
+
+Independent Variables:
+
+- consumer_sentiment
+- inflation_rate
+- gdp_percapita
+- itaee
+- pop_density
+- job_density
+- max_temperature
+- holiday_month
+- unemp_rate
+```{r}
+basic_eda <- function(data)
+{
+  glimpse(data)
+  df_status(data)
+  freq(data) 
+  profiling_num(data)
+  plot_num(data)
+  describe(data)
+}
+basic_eda(cocacolasales_new2)
+
+
+summary(cocacolasales_new2)
+```
+
+# Result Analysis
+
+## Stationary and Non- Stationary
+The ADF test is a test of stationary properties in the time series data
+Based on some statistical package estimates the ARIMA, SARIMA and ARIMAX models.
+
+- H0:  The series data  are Non-stationary (p-value > 0.05)
+- HA: The time series data are stationary  (p-value < 0.05)
+
+**Stationary Test:**
+
+ Our result shows that for the p-value we have is smaller than 0.05 therefore we 
+can reject our null hypothesis and conclude our series data is stationary.
+This means the statistical properties of a process generating a time series do not change over time, in other words it does not mean the data doesn't changes but the way it changes does not itself change over time. And the mean stays constant over the period of time.
+
+```{r}
+adf.test(cocacolasales_new$ccsales_unit_boxes) 
+```
+
+**Acf plots**
+In our plot we see there is autocorrelation around the lags 1, 12 and 16.This shows how the time series is correlated with itself
+```{r}
+acf(cocacolasales_new$ccsales_unit_boxes,main="Significant Autocorrelations")
+```
+
+**Decompose a time series**
+
+Here we have a decompose of the time series, we can take notice:
+
+- The first plot we see is "observed", which is very similar to our first visualization on this r script, that shows a pattern and a slight trend.
+
+- The first component is trend, which shows a positive linear behavior of the time series and it tends to increase seasonally
+
+- The second component represents the seasonality, the repeating patters over time, here we see a pattern where it increases
+a certain period of time and then there's a low peak.
+
+- The third component is random, that shows the variability that can't be explained in the time series, we see random fluctuations not so constant over time,
+there are some randoms and down peaks around 2017.
+```{r}
+arcaipcts<-ts(cocacolasales_new$ccsales_unit_boxes,frequency=12,start=c(2015,1))
+arcapcdec<-decompose(arcaipcts)
+plot(arcapcdec)
+```
+
+##  Regression Model Specification
+### MODEL 1: Fitting the ARMA(1,1)
+The auto regressive component and moving average are statistically significant
+```{r}
+setwd("/Users/gustavoacosta/Desktop/5 semestre/intro econometrics/datasets1")
+coca1 <- read_excel("updated_cocasales_data.xlsx")
+```
+
+
+- AIC : 1400.62 
+- ar1 is statistically significant
+- In our plot we see there is no autocorrelation among the lags, except for lag 20 and 25
+- There is autocorrelation 
+- Box-Ljung test:
+**p-value = 0.9991**
+
+```{r}
+summary(ARMA.mydata<-arma(coca1$ccsales_unit_boxes, order=c(1,1)))
+plot(ARMA.mydata)
+ARMA.residuals<-(ARMA.mydata$residuals)
+ARMA.residuals<-na.omit(ARMA.residuals) 
+acf(ARMA.residuals,main="ACF - ARMA (1,1)")
+Box.test(ARMA.residuals,lag=1,type="Ljung-Box")
+```
+
+
+
+### MODEL 2: ARIMA (1,1,1)
+```{r}
+setwd("/Users/gustavoacosta/Desktop/5 semestre/intro econometrics/datasets1")
+coca2 <- read_excel("updated_cocasales_data.xlsx")
+```
+
+- AIC : -97.31
+- ar1 and ma1 are not statistically significant
+- There is autocorrelation in lag 4, 12 and 16
+- Box-Ljung test:
+**p-value = 0.8713**
+- ADF-test:
+**p-value = 0.01**
+```{r}
+ARIMA.mydatar<-arima(log(coca2$ccsales_unit_boxes), order=c(1,1,1))
+print(ARIMA.mydatar)
+acf(ARIMA.mydatar$residuals,main="ACF - ARIMA (1,0.5,1)")
+Box.test(ARIMA.mydatar$residuals,lag=1,type="Ljung-Box")
+adf.test(ARIMA.mydatar$residual)
+```
+
+
+# VAR Estimation 
+```{r}
+setwd("/Users/gustavoacosta/Desktop/5 semestre/intro econometrics/datasets1")
+coca3 <- read_excel("updated_cocasales_data.xlsx", sheet = "tseries3 - GDL" )
+coca3$date=as.Date(as.yearmon(coca3$date,format="%Y/%m"))
+```
+
+## converting to time series format
+```{r}
+consumer_sentiment<-ts(coca3$consumer_sentiment,start=c(2015,1),end=c(2018,12),frequency=12)
+CPI<-ts(coca3$CPI,start=c(2015,1),end=c(2018,12),frequency=12)
+inflation_rate<-ts(coca3$inflation_rate,start=c(2015,1),end=c(2018,12),frequency=12)
+unemp_rate<-ts(coca3$unemp_rate,start=c(2015,1),end=c(2018,12),frequency=12)
+gdp_percapita<-ts(coca3$gdp_percapita,start=c(2015,1),end=c(2018,12),frequency=12)
+itaee<-ts(coca3$itaee,start=c(2015,1),end=c(2018,12),frequency=12)
+itaee_growth<-ts(coca3$itaee_growth,start=c(2015,1),end=c(2018,12),frequency=12)
+pop_density<-ts(coca3$pop_density,start=c(2015,1),end=c(2018,12),frequency=12)
+job_density<-ts(coca3$job_density,start=c(2015,1),end=c(2018,12),frequency=12)
+pop_minwage<-ts(coca3$pop_minwage,start=c(2015,1),end=c(2018,12),frequency=12)
+exchange_rate<-ts(coca3$exchange_rate,start=c(2015,1),end=c(2018,12),frequency=12)
+max_temperature<-ts(coca3$max_temperature,start=c(2015,1),end=c(2018,12),frequency=12)
+holiday_month<-ts(coca3$holiday_month,start=c(2015,1),end=c(2018,12),frequency=12)
+sales_unitboxes<-ts(coca3$sales_unitboxes,start=c(2015,1),end=c(2018,12),frequency=12)
+```
+
+## plotting time series data
+Here are the plots from our independent variables with the time series data
+```{r}
+par(mfrow=c(3,3))
+plot(coca3$date,coca3$consumer_sentiment,type="l",col="blue",lwd=2,xlab="Date",ylab="consumer_sentiment",main="consumer_sentiment")
+plot(coca3$date,coca3$CPI,type="l",col="blue",lwd=2,xlab="Date",ylab="CPI",main="CPI Rate")
+plot(coca3$date,coca3$inflation_rate,type="l",col="blue",lwd=2,xlab="Date",ylab="Inflation",main="Inflation Rate")
+plot(coca3$date,coca3$unemp_rate,type="l",col="blue",lwd=2,xlab="Date",ylab="unemp_rate",main="unemp_rate")
+plot(coca3$date,coca3$gdp_percapita,type="l",col="blue",lwd=2,xlab="Date",ylab="gdp_percapita",main="gdp_percapita")
+plot(coca3$date,coca3$itaee,type="l",col="blue",lwd=2,xlab="Date",ylab="itaee",main="itaee")
+plot(coca3$date,coca3$gdp_percapita,type="l",col="blue",lwd=2,xlab="Date",ylab="gdp_percapita",main="gdp_percapita")
+plot(coca3$date,coca3$itaee_growth,type="l",col="blue",lwd=2,xlab="Date",ylab="itaee_growth",main="itaee_growth")
+plot(coca3$date,coca3$pop_density,type="l",col="blue",lwd=2,xlab="Date",ylab="pop_density",main="pop_density")
+plot(coca3$date,coca3$job_density,type="l",col="blue",lwd=2,xlab="Date",ylab="job_density",main="job_density")
+plot(coca3$date,coca3$pop_minwage,type="l",col="blue",lwd=2,xlab="Date",ylab="pop_minwage",main="pop_minwage")
+plot(coca3$date,coca3$exchange_rate,type="l",col="blue",lwd=2,xlab="Date",ylab="exchange_rate",main="exchange_rate")
+plot(coca3$date,coca3$max_temperature,type="l",col="blue",lwd=2,xlab="Date",ylab="max_temperature",main="max_temperature")
+plot(coca3$date,coca3$holiday_month,type="l",col="blue",lwd=2,xlab="Date",ylab="holiday_month",main="holiday_month")
+plot(coca3$date,coca3$sales_unitboxes,type="l",col="blue",lwd=2,xlab="Date",ylab="sales_unitboxes",main="sales_unitboxes")
+```
+**Here we have another format for our time series plot but with mostly the same information with our independent variables**
+```{r}
+ts_plot(consumer_sentiment)
+ts_plot(CPI)
+ts_plot(inflation_rate)
+ts_plot(unemp_rate)
+ts_plot(gdp_percapita)
+ts_plot(itaee)
+ts_plot(itaee_growth)
+ts_plot(pop_density)
+ts_plot(job_density)
+ts_plot(pop_minwage)
+ts_plot(exchange_rate)
+ts_plot(max_temperature)
+ts_plot(holiday_month)
+ts_plot(sales_unitboxes)
+```
+
+
+```{r}
+adf.test(coca3$consumer_sentiment)# non-stationary (p-value > 0.05)
+adf.test(coca3$CPI) # non-stationary (p-value > 0.05)
+adf.test(coca3$inflation_rate)# non-stationary (p-value > 0.05)
+adf.test(coca3$unemp_rate) # non-stationary (p-value > 0.05)
+adf.test(coca3$gdp_percapita)# non-stationary (p-value > 0.05)
+adf.test(coca3$itaee)# stationary (p-value < 0.05)
+adf.test(coca3$itaee_growth) # non stationary (p-value < 0.05)
+adf.test(coca3$pop_density)# non-stationary (p-value > 0.05)
+adf.test(coca3$job_density)# non-stationary (p-value > 0.05)
+adf.test(coca3$pop_minwage) # non-stationary (p-value > 0.05)
+adf.test(coca3$exchange_rate)# non-stationary (p-value > 0.05)
+adf.test(coca3$max_temperature) # stationary (p-value < 0.05)
+adf.test(coca3$holiday_month)  # stationary (p-value < 0.05)
+adf.test(coca3$sales_unitboxes)# stationary (p-value < 0.05)
+
+var_tseries1<-cbind(sales_unitboxes,max_temperature,itaee_growth,pop_minwage,consumer_sentiment)
+colnames(var_tseries1)<-cbind("sales_unitboxes","max_temperature","itaee_growth","pop_minwage","consumer_sentiment")
+```
+
+- This line will automatically generate the preferred lag order based on the multivariate iterations of the AIC.The number of lags that will minimize our AIC statistics is 5, but we consider 5 lags to be too much, but we will choose the lag 1, since it has the second lowest AIC
+```{r}
+lagselect1<-VARselect(var_tseries1,lag.max=5,type="const")
+lagselect1$selection
+lagselect1$criteria
+```
+
+- We estimate the VAR model. The p option refers to the number of lags used. We see max_temperature, consumer_sentiment and population wage is statistically significant
+```{r}
+var_model1<-VAR(var_tseries1,p=1,type="const",season=NULL,exog=NULL) 
+summary(var_model1)
+
+```
+
+**Granger causality testing each variable against all the others.**
+
+```{r}
+granger_coca<-causality(var_model1,cause="sales_unitboxes")
+granger_coca
+```
+
+**Transform non-stationary time series variables**
+The number of lags that will minimize our AIC statistics is 2
+```{r}
+diff_sales_unitboxes <- diff(log(sales_unitboxes))
+diff_itaee_growth<-diff(log(itaee_growth))
+diff_unemp_rate<-diff(log(unemp_rate))
+diff_consumer_sentiment<-diff(log(consumer_sentiment))
+diff_max_temperature <- diff(log(max_temperature))
+
+var_tseries2<-cbind(diff_sales_unitboxes, diff_itaee_growth,diff_unemp_rate,diff_consumer_sentiment,diff_max_temperature)
+
+colnames(var_tseries2)<-cbind("sales_unit_boxes", "itaee_growth","unemp_rate","consumer_sentiment","max_temperature")
+
+lagselect2<-VARselect(var_tseries2,lag.max=5,type="const")
+lagselect2$selection
+lagselect2$criteria
+```
+
+**Specify model**
+```{r}
+var_model2<-VAR(var_tseries2,p=2,type="const",season=NULL,exog=NULL) 
+summary(var_model2)
+```
+
+- sales_unit_boxes do not Granger-cause itaee_growth, unemp_rate, consumer_sentiment  and max_temperature, so it's not a bidirectional relationship
+
+```{r}
+granger_coca1<-causality(var_model2,cause="sales_unit_boxes")
+granger_coca1
+```
+
+# Select the regression model that better fits and model diagnostics
+For the selection of the best model we will take in consideration the akaike information criterion and some model diagnostics like the **L-Jung Box Test, R squared and the number of statistically significant variables** but only when the diagnostics apply to the model.
+
+Firstly we will compare L-Jung Box Test for the model of ARMA and ARIMA.
+ARMA model: *0.9991*
+ARIMA model: *0.8713*
+In both of our models  fail to reject our null hypothesis , since the p-value is <0.05, concluding that our model does not show lack of fit 
+```{r}
+Box.test(ARMA.residuals,lag=1,type="Ljung-Box")
+Box.test(ARIMA.mydatar$residuals,lag=1,type="Ljung-Box")
+```
+
+
+**Here we will be evaluating the results of the akaike information criterion (AIC) for each of our models Arma, Arima and Var (with and without logarithm):**
+
+- Model 1 ARMA(1,1):
+      *1400.62*
+- Model 2 ARIMA (1,1,1) :
+      *-97.31*
+- Model 3 VAR(no log) :
+      *1.73e+01*
+- Model 3.1 VAR(log):
+      *-2.14e+01*
+
+- The model with lowest AIC is model VAR 3.1 that includes a logarithmic function, however to choose the model that fits the best we will take in consideration the *R squared*
+
+R SQUARED
+
+MODEL 3 VAR:
+**29.4%**
+
+MODEL 3.1 VAR:
+**52.1%**
+
+Taking this in consideration and that bot hav statistically signifcant variables that affect sales over the period of time we will choose **Model 3.1 VAR (with log)** as the best model. Because the r squared is bigger that means the variance for a dependent variable that's explained by an independent variable.
+
+## Interpret the time series regression of analysis of Model 3.1 VAR
+### Time Series Plots
+Here we have our first plots where we can see a plot for ach one of the independent and dependent variable and it's behavior  over a certain period of time (2015-2018).
+The variables where we can observe trends and th data is **non stationary** are:
+
+- Consumer Sentiment
+- CPI
+- Inflation Rate
+- Unemployment Rate
+- GDP per capita
+- itaee growth
+- population and job density
+- minimum wage
+- exchange rate
+
+and the variables where we see a constant mean over a period of time and stationary time series data are variables:
+
+- Itaee
+- Maximum Temperature
+- Holiday Month
+- Sales unit Boxes
+
+The most compelling plots from our variables are :
+
+- *consumer sentiment*, because we see a constant trend but a low peak around 2017
+- *Inflation rate*, a non stationary variable where we see the lowest and highest peaks around 2017
+-*Unemployment Rate*, also a non stationary variable where it tends to decrease over the period of time
+- *max temperature*,a stationary variable with a constant mean over a period of time and we see a pattern of high and then low peaks.
+
+```{r}
+par(mfrow=c(3,3))
+plot(coca3$date,coca3$consumer_sentiment,type="l",col="blue",lwd=2,xlab="Date",ylab="consumer_sentiment",main="consumer_sentiment")
+plot(coca3$date,coca3$CPI,type="l",col="blue",lwd=2,xlab="Date",ylab="CPI",main="CPI Rate")
+plot(coca3$date,coca3$inflation_rate,type="l",col="blue",lwd=2,xlab="Date",ylab="Inflation",main="Inflation Rate")
+plot(coca3$date,coca3$unemp_rate,type="l",col="blue",lwd=2,xlab="Date",ylab="unemp_rate",main="unemp_rate")
+plot(coca3$date,coca3$gdp_percapita,type="l",col="blue",lwd=2,xlab="Date",ylab="gdp_percapita",main="gdp_percapita")
+plot(coca3$date,coca3$itaee,type="l",col="blue",lwd=2,xlab="Date",ylab="itaee",main="itaee")
+plot(coca3$date,coca3$gdp_percapita,type="l",col="blue",lwd=2,xlab="Date",ylab="gdp_percapita",main="gdp_percapita")
+plot(coca3$date,coca3$itaee_growth,type="l",col="blue",lwd=2,xlab="Date",ylab="itaee_growth",main="itaee_growth")
+plot(coca3$date,coca3$pop_density,type="l",col="blue",lwd=2,xlab="Date",ylab="pop_density",main="pop_density")
+plot(coca3$date,coca3$job_density,type="l",col="blue",lwd=2,xlab="Date",ylab="job_density",main="job_density")
+plot(coca3$date,coca3$pop_minwage,type="l",col="blue",lwd=2,xlab="Date",ylab="pop_minwage",main="pop_minwage")
+plot(coca3$date,coca3$exchange_rate,type="l",col="blue",lwd=2,xlab="Date",ylab="exchange_rate",main="exchange_rate")
+plot(coca3$date,coca3$max_temperature,type="l",col="blue",lwd=2,xlab="Date",ylab="max_temperature",main="max_temperature")
+plot(coca3$date,coca3$holiday_month,type="l",col="blue",lwd=2,xlab="Date",ylab="holiday_month",main="holiday_month")
+plot(coca3$date,coca3$sales_unitboxes,type="l",col="blue",lwd=2,xlab="Date",ylab="sales_unitboxes",main="sales_unitboxes")
+```
+
+### Alternative plots
+Here we have a more specific graph, to observe the behavior of the sales from 2015 to 2018, we can clearly observe a pattern seasonally for this stationary component, most of the low peaks from the sales unit boxes are around the beginning of the year, meanwhile the highest peaks are around the half of the year.
+```{r}
+ts_plot(sales_unitboxes)
+```
+It is important to assess whether the variables under study are stationary or not, as we mention earlier we only have 4 stationary variables while the other 10 are non stationary.
+
+For our model we chose 5 variables:
+- sales_unitboxes
+- max_temperature
+- itaee_growth
+- pop_minwage
+- consumer_sentiment
+
+and we chose this variables because of the patterns we saw in our earlier plots, since they were the most compelling at first sight.Then we did and adf. test in order to asses which were our stationary and non stationary data
+In order to have all our variables stationary we used added a logarithmic function in order that the statistical properties of the system do not change over time.
+With our results we saw  that the lags we would use for our model would be 2, since we consider 5 lags to be to big to analyze.
+```{r}
+lagselect2<-VARselect(var_tseries2,lag.max=5,type="const")
+lagselect2$selection
+lagselect2$criteria
+```
+- The statistically significant variable are **maximum temperature** in both periods and **consumer sentiment** in one period
+```{r}
+var_model2<-VAR(var_tseries2,p=2,type="const",season=NULL,exog=NULL) 
+summary(var_model2)
+```
+
+- sales_unit_boxes do not Granger-cause itaee_growth, unemp_rate, consumer_sentiment  and max_temperature, so it's not a bidirectional relationship
+```{r}
+granger_coca1<-causality(var_model2,cause="sales_unit_boxes")
+granger_coca1
+```
+
+- There could be a unidirectional, bidirectional, or no causality relationships between variables but our granger test shows thatsales_unitboxes do not Granger-cause  the independent variables of max_temperature itaee_growth, pop_minwage, consumer_sentiment.
+
+## Forecast of the dependent variable
+- Finally for our result analysis we have the forecasting for the next year of twelve months for the sales unit boxes from our Vector Auto regression Model.
+Where in our graphic represents the *grey* output, we see a pattern where the sales will increase an then decrease but stabilize by the end of the year.
+
+- However in our chart we can conclude we will expect the biggest number of sales for March and the lowest for February.
+- Most of the negative impact on sales are around the beginning and the middle of the year
+- The unit sales boxes tend to stabilize by the end of the year, out of 12 months of the year 5 will have a negative expectation for sales
+```{r}
+forecast<-predict(var_model2,n.ahead=12,ci=0.95) ### forecast for the next year
+fanchart(forecast,names="sales_unit_boxes",main="Sales unit boxes",xlab="Time Period",ylab="sales")
+forecast
+```
+# Conclusions and Recommendations
+So far the key insights and that we have from our analysis and forecasting is:
+
+-  The variables *maximum temperature* and *consumer sentiment* seem to have an impact on our dependent variable sales of unit boxes, however consumer sentiment has an impact only in a certain period.
+
+ - We can identify a pattern of variance in sales at the beginning of the year, where we have the biggest positive(March) impact as well as negative(February) impact on sales, by the end of the year the sales seem to stabilize.
+ 
+ Taking these observations, we can conclude consumer sentiment might be the variable impacting the most on sales the first part of year, as it shows in our results for lag 1, as well maximum temperature impacts most of the year, as we know consumer sentiment represents how the consumer is feeling in terms of their finances and the state of economy.
+ So the recommendation would be take in consideration this variable at the months where we will expect a negative impact on sales **(January,February, May, July and August )**, to make special offers and discounts that can be accessible and cheaper for our consumer inside supermarkets and convenience stores, in order to make the consumer feel like he doesn't have to spend much money on it's favorite products.
+
+# Appendix
+
+- Tableau Staff. (2020). Time series forecasting: Definition, applications, and examples. Tableau. https://www.tableau.com/learn/articles/time-series-forecasting#:~:text=Analysts%20can%20tell%20the%20difference,which%20the%20data%20is%20changing. 
+

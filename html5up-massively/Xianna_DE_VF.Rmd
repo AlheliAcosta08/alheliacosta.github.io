@@ -1,0 +1,448 @@
+---
+title: "DE_IA"
+author: "XIMENA JIMÉNEZ A01653511"
+date: "4/19/2022"
+output: html_document
+---
+
+## R Markdown
+```{r}
+library(dplyr)
+library(DataExplorer)
+library(dplyr)
+library(glmnet)
+library(mice) # Imputation
+library(caret)
+library(mltools) #Dummy variables
+library(data.table) #Dummy variables
+library(caTools)
+library(recipes)
+library(e1071)
+library(Metrics)
+library(ggplot2)
+library(car)
+library(tidyverse)  
+library(fastDummies)
+```
+
+```{r}
+df <- read_csv("xianna-db.csv")
+```
+
+
+#Limpieza de datos
+
+El primer paso que realizamos como equipo fue cambiar los nombres de las variables dependientes, ya que nos salia el nombre de la imagen como tal, esto para nosotras poder entender el estilo del cual se esta hablando.
+
+#Cambio de valores de variable dependiente
+```{r}
+df$Q22 <- replace(df$Q22, df$Q22 == 'IM_cCnR9uUDkf4qwaG', 'casual')
+df$Q22 <- replace(df$Q22, df$Q22 == 'IM_agfHm6IKWy5kEPY', 'urbano')
+df$Q22 <- replace(df$Q22, df$Q22 == 'IM_3JFQ8fvdCB4Qhsq', 'artistico')
+df$Q22 <- replace(df$Q22, df$Q22 == 'IM_baoggrfRknDAJXU', 'elegante')
+df$Q22 <- replace(df$Q22, df$Q22 == 'IM_9oeBpiNyhVmNwvI', 'romantico')
+```
+
+Asi mismo excluimos todoas las columnas que no porporcionaban información relevante para nuestro modelo.
+
+
+
+#Excluímos las columnas que no utilizaremos
+```{r}
+df1 <- select(df, -c("Progress","Duration (in seconds)","Finished","RecordedDate","ResponseId","DistributionChannel","UserLanguage","RecipientLastName","RecipientFirstName","RecipientEmail","ExternalReference","LocationLatitude","LocationLongitude"))
+```
+
+Es por esto que decidimos quedarnos solamente con genero,edad, estilo y las preguntas de personalidad.
+
+Donde se se decidio cambiar su nombre para un mejor entendimiento.
+
+#Cambiamos el nombre de las columna
+```{r}
+names(df1)[names(df1) == 'Q23'] <- 'Genero'
+names(df1)[names(df1) == 'Q24'] <- 'Edad'
+names(df1)[names(df1) == 'Q22'] <- 'Estilo'
+```
+
+
+Recordando que nuestro estudio solamente se concentra en el genero Femenino, se realizo una selección de solamente del este sexo.
+
+#Seleccionamos solo la variable de sexo Femenino
+
+```{r}
+df1 <- df1[df1$Genero == "Femenino",]
+df1
+```
+
+Por otro lado, categorizamos edad de la siguiente manera:
+ '18 a 24 años'=1
+ '25 a 34 años'=2
+ '45 a 54 años'=3
+Esto ya que edad estaba en rangos poder tener un mejor orden de los datos y poder tener una mejor interpretación de ellos.
+
+#Categorizamos la edad ya que está en rangos 
+```{r}
+df1$Edad <- replace(df1$Edad,df1$Edad  == '18 a 24 años', 1)
+df1$Edad <- replace(df1$Edad,df1$Edad  == '45 a 54 años', 3)
+df1$Edad <- replace(df1$Edad,df1$Edad  == '25 a 34 años', 2)
+```
+
+Despues de la catogorización, nos dimos cuenta que el rango muy predominante de edad era de 18 a 24, lo cual es nuestro mercado meta, es por esto que como eran muy pocos registros de la categoria 2 y 3 de edad, se decidio eliminar la variable edad completamente.
+
+En donde se asumira que la edad de la encuesta es de mujeres entre18 y 24 años.
+
+# Se elimina edad
+```{r}
+df1 <- select(df1, -c("Edad"))
+df1
+```
+
+Por otro lado, encontramos que las repsuestas de la escala de liker se encontraban en caracter, es por esto que las convertimos a numero, donde muy desacuardo es 1 y muy de acuerdo es 5.
+
+# Se convierte a factor las repuestas de la escala de Liker
+
+```{r}
+df1$Q1 <- recode_factor(df1$Q1, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q2 <- recode_factor(df1$Q2, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q3 <- recode_factor(df1$Q3, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q4 <- recode_factor(df1$Q4, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q5 <- recode_factor(df1$Q5, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q6 <- recode_factor(df1$Q6, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q7 <- recode_factor(df1$Q7, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q8 <- recode_factor(df1$Q8, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q9 <- recode_factor(df1$Q9, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q10 <- recode_factor(df1$Q10, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q11 <- recode_factor(df1$Q11, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q12 <- recode_factor(df1$Q12, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q13 <- recode_factor(df1$Q13, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q14 <- recode_factor(df1$Q14, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q15 <- recode_factor(df1$Q15, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q16 <- recode_factor(df1$Q16, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q17 <- recode_factor(df1$Q17, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q18 <- recode_factor(df1$Q18, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q19 <- recode_factor(df1$Q19, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+df1$Q20 <- recode_factor(df1$Q20, "Muy en desacuerdo"  = 1, "Algo en desacuerdo" = 2, "Ni de acuerdo ni en desacuerdo" = 3, "Algo de acuerdo" = 4, "Muy de acuerdo" = 5)
+
+```
+
+Asi mismo, nos dimos cuenta que para tener un mejor resultado las respuestas de las varibles de la spreguntas de personalidad, deberian de ser numericas y esto ayudara aun mas al modelo ya que algunos solo trabajan con numericas.
+
+# Se cambio a numerica
+
+```{r}
+df1$Q1 <- as.numeric(df1$Q1)
+df1$Q2 <- as.numeric(df1$Q2)
+df1$Q3 <- as.numeric(df1$Q3)
+df1$Q4 <- as.numeric(df1$Q4)
+df1$Q5 <- as.numeric(df1$Q5)
+df1$Q6 <- as.numeric(df1$Q6)
+df1$Q7 <- as.numeric(df1$Q7)
+df1$Q8 <- as.numeric(df1$Q8)
+df1$Q9 <- as.numeric(df1$Q9)
+df1$Q10 <- as.numeric(df1$Q10)
+df1$Q11 <- as.numeric(df1$Q11)
+df1$Q12 <- as.numeric(df1$Q12)
+df1$Q13 <- as.numeric(df1$Q13)
+df1$Q14 <- as.numeric(df1$Q14)
+df1$Q15 <- as.numeric(df1$Q15)
+df1$Q16 <- as.numeric(df1$Q16)
+df1$Q17 <- as.numeric(df1$Q17)
+df1$Q18 <- as.numeric(df1$Q18)
+df1$Q19 <- as.numeric(df1$Q19)
+df1$Q20 <- as.numeric(df1$Q20)
+df1
+```
+
+Por otro lado tambien se convierte el estilo a factor, ya que se encuentra como un character.
+
+# Estilo a factor
+
+```{r}
+df1$Estilo <- as.factor(df1$Estilo)
+```
+
+
+Una vez realizada nuestra limpieza de datos, seguiremos con la limpieza de los valores nulos.
+
+# Valores Nulos
+
+En esta tabla podemos observar que todas las variables cuentan con valores nulos, en un promedio de entre 4 y 7 por varible.
+
+```{r}
+colSums(is.na(df1))
+```
+
+
+Encontramos filas de respuestas que solamente tenian respondido la edad y el sexo, se decidio eliminarlas completamente, estas filas eran las número 45, 150, 163 y 165.
+
+# Se eliminan filas completas de NA
+
+```{r}
+df1 <- df1[-c(45,150,163,165),]
+```
+
+Como equipo decidimos imputar por la moda, ya que pues la ropa simepre tiende a ser algo e tendecia y se considera en el area de lo moda, es por esto que imputamos con moda.
+
+# Se imputa por la moda
+
+```{r}
+library(modeest)
+```
+
+Por oto lado cuando queriamos usar la moda en la base de datos normal, no nos funcionaba porque todavia teniamos datos nulos, entonces decidimos hacer una nueva base de datos e excluir todos los valores nulos, esto solamente para saber la moda de las variables que necesitabamos para poder imputar mas adelante.
+
+
+# nueva base de datos para solo sacar la moda 
+```{r}
+df2 <- df1 %>% na.omit()
+```
+
+# se obtuvo la moda 
+
+Recordano anteriormente que elimanos columnas completas de na, esto nos ayudo a que solamente las variables q17,q18,q19,q20 y estilo tuvieran nas.
+
+Asi que solamente se obtuvo la moda de estas preguntas y estilo, donde podemos obervar la tabla a continuación:
+```{r}
+mlv(df2$Q17, method = "mfv")
+mlv(df2$Q18, method = "mfv")
+mlv(df2$Q19, method = "mfv")
+mlv(df2$Q20, method = "mfv")
+mlv(df2$Estilo, method = "mfv")
+```
+# Imputacion de datos
+
+# Numericas por moda
+Se realizo la imputación de datos de moda, con un mutate donde si existe un na, me vas a replazar con el numero que se encuntre despues de la coma.
+
+```{r}
+df1 <- df1  %>% mutate (Q17 = replace(Q17, which(is.na(Q17)), 4))
+df1 <- df1  %>% mutate (Q18 = replace(Q18, which(is.na(Q18)), 5))
+df1 <- df1  %>% mutate (Q19 = replace(Q19, which(is.na(Q19)), 5))
+df1 <- df1  %>% mutate (Q20 = replace(Q20, which(is.na(Q20)), 5))
+```
+
+# Character por moda
+
+Por otro lado se aplico lo mismo que se realizo en la numerica, pero ahora con el character de moda.
+```{r}
+df1 <- df1  %>% mutate (Estilo = replace(Estilo, which(is.na(Estilo)), "casual"))
+```
+
+Por ultimo podemos observar que ya no se encuentran valores nulos en nuestra base de datos.
+
+# Sin valores nulos
+```{r}
+colSums(is.na(df1))
+```
+
+
+# Modelo de arbol de decisión
+
+## Train y Test
+```{r}
+# se cambio otra vez estilo a factor , porque en la imputacion se convirtio a caracter.
+df1$Estilo <- as.factor(df1$Estilo)
+```
+
+```{r}
+library(caTools)
+set.seed(123)
+split = sample.split(df1$Estilo, SplitRatio = 0.80)
+training_set = subset(df1, split == TRUE)
+test_set = subset(df1, split == FALSE)
+```
+
+Se realizó un class distribution, donde podemos observar que el estilo que mas predomina es el "CASUAL"
+
+```{r}
+barplot(prop.table(table(df1$Estilo)),
+        col = rainbow(2),
+        ylim = c(0, 0.7),
+        main = "Class Distribution")
+```
+
+
+# Arbol de decisión
+
+
+```{r}
+library(rpart)
+regressor = rpart(formula = Estilo ~ .,
+                  data = training_set  ,
+                  control = rpart.control(minsplit = 1))
+```
+
+```{r}
+library(rpart.plot)
+rpart.plot(x = regressor, yesno = 2, type = 0, extra = 0)
+
+```
+
+En arbol de decisión presentado anteriormente podemos observar que es muy sensible al cambio de respuestas, es decir que si tu en la pregunta 5 estas muy de acuerdo, pero en la 8 estas ni de acuerdo ni en desacuerdo, te cambia completamente es estilo, es por esto que se pueden onservar muchas ramas en arbol y esto a veces se puede complicar, ya que se batalla para interpretar la información.
+
+```{r}
+y_pred <- predict(regressor,newdata = test_set, type = 'class')
+y_pred
+```
+
+
+```{r}
+library(caret)
+confusionMatrix(data = y_pred, reference = test_set$Estilo)
+```
+Dado a lo que mencionbamos anteriormente, al momento que contiene muchas ramas su capacidad de segmentar el estilo es menos satisfactoria, es por que se obtiene un modelo con una acurracy de 0.31, lo cual es muy bajo y por ende no predice de una manerra correcta los estilos, es decir que se llega a equivocar mucho, donde se equivoca mas en artistico y casual.
+
+Arbol de decisión, pruning 
+
+## A partir del árbol de decisión anterior, se aplicó el método de pruning, el cual es útil para evitar el sobreajuste de los datos y reducir la complejidad del árbol. Con esto, se eliminan los nodos innecesarios para el crecimiento
+
+## Train y Test
+
+```{r}
+dataset = df1
+```
+
+Se convierte la variable dependiente a factor. 
+```{r}
+# se cambio otra vez estilo a factor , porque en la imputacion se convirtio a caracter.
+dataset$Estilo <- as.factor(dataset$Estilo)
+```
+
+```{r}
+library(caTools)
+set.seed(123)
+split = sample.split(dataset$Estilo, SplitRatio = 0.80)
+training_set_pr = subset(dataset, split == TRUE)
+test_set_pr = subset(dataset, split == FALSE)
+```
+
+Como primera instancia se establecen los parámetros con valores al azar, para observar el comportamiento en métricas de precisión.
+
+```{r}
+tree<-rpart(Estilo~ .-Genero, method="class", data=training_set_pr, control=rpart.control(minsplit=2, cp=0.01))
+tree
+```
+```{r}
+printcp(tree)
+```
+
+Con el plot de complejidad de parametros (CP), nos permite determinar el tamaño ideal del árbol de decisión a partir de la elección del parámetro que maximice el rendimiento de nuestro árbol.
+
+```{r}
+plotcp(Sample_tree)
+```
+
+```{r}
+printcp(tree)
+```
+
+Una vez mostrado tanto, el gráfico y la tabla del complexity parameter, determinamos el valor ideal del CP que minimice el error y maximice el rendimiento con el siguiente código:
+
+```{r}
+xerror <- tree$cptable[,"xerror"]
+imin.xerror <- which.min(xerror)
+# Valor óptimo
+tree$cptable[imin.xerror, ]
+```
+
+Aplicamos el CP arrojado en el ánalisis anterior
+```{r}
+tree_cp<-rpart(Estilo~ ., method="class", data=training_set, control=rpart.control(minsplit=2, cp=0.03823529 ))
+tree_cp
+```
+
+Creamos las predicciones
+```{r}
+y_pred_pr <- predict(tree_cp,newdata = test_set, type = 'class')
+y_pred_pr
+```
+
+Creamos la matruz de confusión y se observa una mejora el la precisón del modelo. Sin embargo, sigue sin ser suficiente para ser considerado óptimo para el manejo de nuestros datos.
+```{r}
+library(caret)
+confusionMatrix(data = y_pred_pr, reference = test_set$Estilo)
+```
+
+# Random Forest Classification
+# Splitting the dataset into the Training set and Test set
+```{r}
+library(caTools)
+set.seed(123)
+split = sample.split(df1$Estilo, SplitRatio = 0.75)
+training_set_1 = subset(df1, split == TRUE)
+test_set_1 = subset(df1, split == FALSE)
+```
+
+```{r}
+library(randomForest)
+set.seed(123)
+classifier = randomForest(x = training_set_1,
+                          y = training_set_1$Estilo,
+                          ntree = 500, importance = T)
+```
+
+```{r}
+classifier$importance
+```
+
+```{r}
+# Predicting the Test set results
+y_pred = predict(classifier, newdata = test_set_1)
+```
+
+
+```{r}
+# Making the Confusion Matrix
+cm = table(test_set_1[, 1,2], y_pred)
+```
+
+
+```{r}
+library(caret)
+confusionMatrix(data = y_pred, reference = test_set_1$Estilo)
+```
+
+Recordando que un random forest es muhco mejor que un arbol de decision, aqui se puede confirmar ya que se obtuvo un acurracy de 0.9 y kappa de 0.8, estos nos da a enteder que nuesro modelo tiende a calificar de una manera mas correcta la predición del estilo, donde este se equivoca menos.
+
+Asi mismo podemos observar que clasifico correctamente todo el estilo de casual y elegante, se equivoco una vez en artistico, y donde mas se equivoco fue en urbano.
+
+```{r}
+# Choosing the number of trees
+plot(classifier)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
